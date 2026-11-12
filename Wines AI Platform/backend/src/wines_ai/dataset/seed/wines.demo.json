@@ -1,0 +1,1481 @@
+{
+  "dataset_version": "demo-0.1",
+  "built_at": "2026-10-22T00:00:00Z",
+  "notes": "Demo artifact. Identical to wines.seed.json on every taste axis, description and region - the only differences are example_producers, review_status and dataset_version. review_status is 'fixture' on every row: the producer names are illustrative and have NOT been verified by a person, and schema.py forbids a fixture row from carrying a reviewed_by signature. Use this to demo a full card; do not treat the producer names as checked facts. Load with WA_DATASET_PATH=.../wines.demo.json.",
+  "rows": [
+    {
+      "row_id": "w-0001",
+      "variety": "Cabernet Sauvignon",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "full",
+      "oak": "pronounced",
+      "tannin": "grippy",
+      "acidity": "fresh",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Blackcurrant and cedar, firm and structured, with a long grippy finish.",
+      "typical_regions": [
+        "Bordeaux",
+        "Napa Valley",
+        "Coonawarra"
+      ],
+      "example_producers": [
+        "Château Léoville-Barton",
+        "Stag's Leap Wine Cellars",
+        "Wynns Coonawarra Estate"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0002",
+      "variety": "Merlot",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "subtle",
+      "tannin": "moderate",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Plum and soft dark fruit, rounded and gentle, with easy tannins.",
+      "typical_regions": [
+        "Bordeaux",
+        "Washington State",
+        "Tuscany"
+      ],
+      "example_producers": [
+        "Château La Conseillante",
+        "Leonetti Cellar",
+        "Ornellaia"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0003",
+      "variety": "Pinot Noir",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "subtle",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Red cherry and rose, delicate and silky, with very little grip.",
+      "typical_regions": [
+        "Burgundy",
+        "Willamette Valley",
+        "Central Otago"
+      ],
+      "example_producers": [
+        "Domaine Dujac",
+        "Domaine Drouhin Oregon",
+        "Felton Road"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0004",
+      "variety": "Grenache",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.68,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Ripe strawberry and warm spice, soft and generous, low in grip.",
+      "typical_regions": [
+        "Southern Rhone",
+        "Priorat",
+        "Barossa Valley"
+      ],
+      "example_producers": [
+        "Château Rayas",
+        "Clos Mogador",
+        "Yalumba"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0005",
+      "variety": "Malbec",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "full",
+      "oak": "subtle",
+      "tannin": "moderate",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Dark plum and violet, plush and inky, with smooth easy tannins.",
+      "typical_regions": [
+        "Mendoza",
+        "Cahors"
+      ],
+      "example_producers": [
+        "Catena Zapata",
+        "Achaval-Ferrer",
+        "Château du Cèdre"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0006",
+      "variety": "Syrah",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "full",
+      "oak": "subtle",
+      "tannin": "grippy",
+      "acidity": "fresh",
+      "fruit_savoury": "earthy",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Black pepper, olive and dark fruit, savoury and firm.",
+      "typical_regions": [
+        "Northern Rhone",
+        "Barossa Valley",
+        "Hawke's Bay"
+      ],
+      "example_producers": [
+        "Domaine Jean-Louis Chave",
+        "Penfolds",
+        "Craggy Range"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0007",
+      "variety": "Nebbiolo",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "full",
+      "oak": "none",
+      "tannin": "grippy",
+      "acidity": "racy",
+      "fruit_savoury": "earthy",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Tar, dried rose and sour cherry, pale in colour but fiercely structured.",
+      "typical_regions": [
+        "Piedmont"
+      ],
+      "example_producers": [
+        "Giacomo Conterno",
+        "Bruno Giacosa",
+        "Produttori del Barbaresco"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0008",
+      "variety": "Sangiovese",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "subtle",
+      "tannin": "grippy",
+      "acidity": "racy",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Sour cherry and tomato leaf, bright and savoury, with chalky tannins.",
+      "typical_regions": [
+        "Tuscany",
+        "Chianti"
+      ],
+      "example_producers": [
+        "Fontodi",
+        "Isole e Olena",
+        "Castello di Monsanto"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0009",
+      "variety": "Gamay",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Crunchy red berries and banana, light, juicy and thirst-quenching.",
+      "typical_regions": [
+        "Beaujolais",
+        "Loire Valley"
+      ],
+      "example_producers": [
+        "Marcel Lapierre",
+        "Jean Foillard",
+        "Château Thivin"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0010",
+      "variety": "Tempranillo",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "pronounced",
+      "tannin": "moderate",
+      "acidity": "fresh",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Red fruit with vanilla and leather from oak ageing, savoury and smooth.",
+      "typical_regions": [
+        "Rioja",
+        "Ribera del Duero"
+      ],
+      "example_producers": [
+        "La Rioja Alta",
+        "R. López de Heredia",
+        "Vega Sicilia"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0011",
+      "variety": "Carmenere",
+      "style": "red",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "subtle",
+      "tannin": "moderate",
+      "acidity": "soft",
+      "fruit_savoury": "earthy",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.62,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Dark fruit with a green peppercorn edge, soft and herbal.",
+      "typical_regions": [
+        "Central Valley, Chile"
+      ],
+      "example_producers": [
+        "Concha y Toro",
+        "Viña Errázuriz",
+        "Santa Rita"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0012",
+      "variety": "Zinfandel",
+      "style": "red",
+      "sweetness": "off_dry",
+      "body": "full",
+      "oak": "subtle",
+      "tannin": "moderate",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.71,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Jammy blackberry and sweet spice, rich and faintly sweet on the finish.",
+      "typical_regions": [
+        "Lodi",
+        "Napa Valley"
+      ],
+      "example_producers": [
+        "Ridge Vineyards",
+        "Turley Wine Cellars",
+        "Klinker Brick"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0013",
+      "variety": "Recioto della Valpolicella",
+      "style": "red",
+      "sweetness": "sweet",
+      "body": "full",
+      "oak": "subtle",
+      "tannin": "moderate",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.82,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Dried cherry and chocolate, properly sweet and velvety, made from raisined grapes.",
+      "typical_regions": [
+        "Veneto"
+      ],
+      "example_producers": [
+        "Giuseppe Quintarelli",
+        "Dal Forno Romano",
+        "Masi"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0014",
+      "variety": "Chardonnay (oaked)",
+      "style": "white",
+      "sweetness": "dry",
+      "body": "full",
+      "oak": "pronounced",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Baked apple, butter and toast, broad and creamy in the mouth.",
+      "typical_regions": [
+        "Burgundy",
+        "Napa Valley",
+        "Margaret River"
+      ],
+      "example_producers": [
+        "Domaine Leflaive",
+        "Kistler Vineyards",
+        "Leeuwin Estate"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0015",
+      "variety": "Chardonnay (unoaked)",
+      "style": "white",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Green apple, lemon and wet stone, lean and mineral with no oak at all.",
+      "typical_regions": [
+        "Chablis",
+        "Limestone Coast"
+      ],
+      "example_producers": [
+        "Domaine William Fèvre",
+        "Domaine Raveneau",
+        "Jean-Marc Brocard"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0016",
+      "variety": "Sauvignon Blanc",
+      "style": "white",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Passionfruit, grass and grapefruit, sharply aromatic and zippy.",
+      "typical_regions": [
+        "Marlborough",
+        "Loire Valley"
+      ],
+      "example_producers": [
+        "Cloudy Bay",
+        "Greywacke",
+        "Didier Dagueneau"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0017",
+      "variety": "Pinot Grigio",
+      "style": "white",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Pear and lemon pith, light and clean, deliberately understated.",
+      "typical_regions": [
+        "Veneto",
+        "Alto Adige"
+      ],
+      "example_producers": [
+        "Alois Lageder",
+        "Elena Walch",
+        "Santa Margherita"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0018",
+      "variety": "Riesling (dry)",
+      "style": "white",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Lime, green apple and petrol, piercing and bone-clean.",
+      "typical_regions": [
+        "Alsace",
+        "Clare Valley"
+      ],
+      "example_producers": [
+        "Trimbach",
+        "Domaine Weinbach",
+        "Grosset"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0019",
+      "variety": "Riesling (off-dry)",
+      "style": "white",
+      "sweetness": "off_dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Peach and lime with a touch of honey, the sweetness held up by sharp acidity.",
+      "typical_regions": [
+        "Mosel",
+        "Finger Lakes"
+      ],
+      "example_producers": [
+        "Dr. Loosen",
+        "Joh. Jos. Prüm",
+        "Hermann J. Wiemer"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0020",
+      "variety": "Riesling (Auslese)",
+      "style": "white",
+      "sweetness": "sweet",
+      "body": "medium",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Apricot and honey, properly sweet but kept lively by racy acidity.",
+      "typical_regions": [
+        "Mosel",
+        "Rheingau"
+      ],
+      "example_producers": [
+        "Joh. Jos. Prüm",
+        "Egon Müller",
+        "Robert Weil"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0021",
+      "variety": "Chenin Blanc",
+      "style": "white",
+      "sweetness": "off_dry",
+      "body": "medium",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.66,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Quince and chamomile with a hint of sweetness, textured and gentle.",
+      "typical_regions": [
+        "Vouvray",
+        "Swartland"
+      ],
+      "example_producers": [
+        "Domaine Huet",
+        "François Chidaine",
+        "Sadie Family Wines"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0022",
+      "variety": "Gewurztraminer",
+      "style": "white",
+      "sweetness": "off_dry",
+      "body": "full",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Lychee, rose and ginger, broad and perfumed with soft acidity.",
+      "typical_regions": [
+        "Alsace",
+        "Alto Adige"
+      ],
+      "example_producers": [
+        "Domaine Zind-Humbrecht",
+        "Trimbach",
+        "Cantina Tramin"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0023",
+      "variety": "Albarino",
+      "style": "white",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "White peach and sea salt, crisp and saline.",
+      "typical_regions": [
+        "Rias Baixas"
+      ],
+      "example_producers": [
+        "Pazo de Señoráns",
+        "Do Ferreiro",
+        "Zárate"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0024",
+      "variety": "Viognier",
+      "style": "white",
+      "sweetness": "dry",
+      "body": "full",
+      "oak": "subtle",
+      "tannin": "smooth",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Apricot and honeysuckle, full and oily with low acidity.",
+      "typical_regions": [
+        "Condrieu",
+        "Northern Rhone"
+      ],
+      "example_producers": [
+        "E. Guigal",
+        "Georges Vernay",
+        "André Perret"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0025",
+      "variety": "Gruner Veltliner",
+      "style": "white",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "earthy",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Green pea, white pepper and lentil, dry and savoury.",
+      "typical_regions": [
+        "Wachau",
+        "Kamptal"
+      ],
+      "example_producers": [
+        "Weingut Hirtzberger",
+        "F.X. Pichler",
+        "Schloss Gobelsburg"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0026",
+      "variety": "Semillon",
+      "style": "white",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.64,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Lemon curd and lanolin, restrained young and waxy with age.",
+      "typical_regions": [
+        "Hunter Valley",
+        "Bordeaux"
+      ],
+      "example_producers": [
+        "Tyrrell's Wines",
+        "Mount Pleasant",
+        "Château Smith Haut Lafitte"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0027",
+      "variety": "Rose of Grenache",
+      "style": "rose",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Pale, dry and delicate, with white peach and a saline finish.",
+      "typical_regions": [
+        "Provence",
+        "Southern Rhone"
+      ],
+      "example_producers": [
+        "Domaine Tempier",
+        "Château d'Esclans",
+        "Domaines Ott"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0028",
+      "variety": "Rose of Pinot Noir",
+      "style": "rose",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Wild strawberry and citrus, taut and refreshing.",
+      "typical_regions": [
+        "Loire Valley",
+        "Oregon"
+      ],
+      "example_producers": [
+        "Domaine Vacheron",
+        "Lucien Crochet",
+        "Soter Vineyards"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0029",
+      "variety": "Rose of Sangiovese",
+      "style": "rose",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.61,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Redcurrant and herb, dry and savoury with real bite.",
+      "typical_regions": [
+        "Tuscany"
+      ],
+      "example_producers": [
+        "Fattoria Le Pupille",
+        "Castello di Ama",
+        "Antinori"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0030",
+      "variety": "White Zinfandel",
+      "style": "rose",
+      "sweetness": "off_dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Candied strawberry and melon, soft and openly sweet-edged.",
+      "typical_regions": [
+        "California"
+      ],
+      "example_producers": [
+        "Sutter Home",
+        "Beringer",
+        "Barefoot"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0031",
+      "variety": "Rose d'Anjou",
+      "style": "rose",
+      "sweetness": "off_dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Raspberry and redcurrant with a gentle touch of sweetness.",
+      "typical_regions": [
+        "Loire Valley"
+      ],
+      "example_producers": [
+        "Domaine des Baumard",
+        "Château de Fesles",
+        "Domaine Ogereau"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0032",
+      "variety": "Moscato Rosa",
+      "style": "rose",
+      "sweetness": "sweet",
+      "body": "medium",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.58,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Rose petal and raspberry, openly sweet and perfumed.",
+      "typical_regions": [
+        "Alto Adige"
+      ],
+      "example_producers": [
+        "Franz Haas",
+        "Cantina Tramin",
+        "Castel Sallegg"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0033",
+      "variety": "Champagne (Brut)",
+      "style": "sparkling",
+      "sweetness": "dry",
+      "body": "medium",
+      "oak": "subtle",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Green apple, brioche and chalk, fine bubbles and a bracing finish.",
+      "typical_regions": [
+        "Champagne"
+      ],
+      "example_producers": [
+        "Bollinger",
+        "Pol Roger",
+        "Louis Roederer"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0034",
+      "variety": "Cremant de Loire",
+      "style": "sparkling",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Pear and white flowers, clean and lightly creamy.",
+      "typical_regions": [
+        "Loire Valley"
+      ],
+      "example_producers": [
+        "Langlois-Château",
+        "Bouvet-Ladubay",
+        "Domaine des Baumard"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0035",
+      "variety": "Cava",
+      "style": "sparkling",
+      "sweetness": "dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "earthy",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Lemon, almond and a faint bitterness, crisp and savoury.",
+      "typical_regions": [
+        "Penedes"
+      ],
+      "example_producers": [
+        "Recaredo",
+        "Gramona",
+        "Codorníu"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0036",
+      "variety": "Prosecco (Extra Dry)",
+      "style": "sparkling",
+      "sweetness": "off_dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.69,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Green apple and white peach, frothy with a gently sweet edge.",
+      "typical_regions": [
+        "Veneto",
+        "Valdobbiadene"
+      ],
+      "example_producers": [
+        "Nino Franco",
+        "Bisol",
+        "Adami"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0037",
+      "variety": "Lambrusco (Amabile)",
+      "style": "sparkling",
+      "sweetness": "off_dry",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Sparkling red, violet and blueberry, lightly sweet and very easy.",
+      "typical_regions": [
+        "Emilia-Romagna"
+      ],
+      "example_producers": [
+        "Cleto Chiarli",
+        "Medici Ermete",
+        "Cavicchioli"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0038",
+      "variety": "Asti Spumante",
+      "style": "sparkling",
+      "sweetness": "sweet",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Grapey, floral and frankly sweet, low in alcohol and fizzy.",
+      "typical_regions": [
+        "Piedmont"
+      ],
+      "example_producers": [
+        "Fontanafredda",
+        "Martini & Rossi",
+        "Cinzano"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0039",
+      "variety": "Sauternes",
+      "style": "dessert",
+      "sweetness": "sweet",
+      "body": "full",
+      "oak": "subtle",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Marmalade, saffron and honey, unctuous but held together by acidity.",
+      "typical_regions": [
+        "Sauternes",
+        "Barsac"
+      ],
+      "example_producers": [
+        "Château d'Yquem",
+        "Château Climens",
+        "Château Coutet"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0040",
+      "variety": "Tawny Port",
+      "style": "dessert",
+      "sweetness": "sweet",
+      "body": "full",
+      "oak": "pronounced",
+      "tannin": "moderate",
+      "acidity": "soft",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Walnut, fig and caramel, fortified, sweet and nutty from cask ageing.",
+      "typical_regions": [
+        "Douro Valley"
+      ],
+      "example_producers": [
+        "Taylor's",
+        "Graham's",
+        "Niepoort"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0041",
+      "variety": "Moscato d'Asti",
+      "style": "dessert",
+      "sweetness": "sweet",
+      "body": "light",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Orange blossom and ripe grape, lightly fizzy, sweet and delicate.",
+      "typical_regions": [
+        "Piedmont",
+        "Asti"
+      ],
+      "example_producers": [
+        "Vietti",
+        "Paolo Saracco",
+        "La Spinetta"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0042",
+      "variety": "Tokaji Aszu",
+      "style": "dessert",
+      "sweetness": "sweet",
+      "body": "full",
+      "oak": "subtle",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Dried apricot and barley sugar, intensely sweet with piercing acidity.",
+      "typical_regions": [
+        "Tokaj"
+      ],
+      "example_producers": [
+        "Royal Tokaji",
+        "Disznókő",
+        "Oremus"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0043",
+      "variety": "Eiswein",
+      "style": "dessert",
+      "sweetness": "sweet",
+      "body": "medium",
+      "oak": "none",
+      "tannin": "smooth",
+      "acidity": "racy",
+      "fruit_savoury": "fruit_forward",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Concentrated peach and lime from frozen grapes, sweet and electric.",
+      "typical_regions": [
+        "Mosel",
+        "Niagara Peninsula"
+      ],
+      "example_producers": [
+        "Dr. Loosen",
+        "Inniskillin",
+        "Pillitteri Estates"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0044",
+      "variety": "Pedro Ximenez",
+      "style": "dessert",
+      "sweetness": "sweet",
+      "body": "full",
+      "oak": "pronounced",
+      "tannin": "smooth",
+      "acidity": "soft",
+      "fruit_savoury": "earthy",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Raisin, molasses and coffee, almost black and syrupy sweet.",
+      "typical_regions": [
+        "Jerez"
+      ],
+      "example_producers": [
+        "González Byass",
+        "Emilio Lustau",
+        "Osborne"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    },
+    {
+      "row_id": "w-0045",
+      "variety": "Vin Santo",
+      "style": "dessert",
+      "sweetness": "sweet",
+      "body": "medium",
+      "oak": "subtle",
+      "tannin": "smooth",
+      "acidity": "fresh",
+      "fruit_savoury": "balanced",
+      "confidence": {
+        "sweetness": 0.92,
+        "body": 0.86,
+        "oak": 0.8,
+        "tannin": 0.55,
+        "acidity": 0.8,
+        "fruit_savoury": 0.78
+      },
+      "description": "Dried fig and almond, sweet and nutty, traditionally served with biscotti.",
+      "typical_regions": [
+        "Tuscany"
+      ],
+      "example_producers": [
+        "Avignonesi",
+        "Isole e Olena",
+        "Fèlsina"
+      ],
+      "review_status": "fixture",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "dataset_version": "demo-0.1"
+    }
+  ]
+}
