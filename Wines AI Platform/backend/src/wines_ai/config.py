@@ -21,8 +21,8 @@ class Settings(BaseSettings):
 
     # --- transport -------------------------------------------------------
     cors_origins: list[str] = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
+        "http://localhost:5180",
+        "http://127.0.0.1:5180",
         "http://localhost:3000",
     ]
     cookie_secret: str = "dev-only-change-me"
@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     confidence_threshold: float = 0.75
     max_interview_questions: int = 3
     results_min: int = 3
-    results_max: int = 5
+    results_max: int = 3
     # The abstention gate (FR-13), in two parts.
     #
     # `sweetness_tolerance_levels` is the real gate and is deliberately NOT a
@@ -74,6 +74,12 @@ class Settings(BaseSettings):
     # red (three questions asked) and 0.50 for a dessert (two), so any single
     # threshold is either too tight for one or too loose for the other.
     sweetness_tolerance_levels: int = 1
+    # The same hard rule for the style's third axis (body for red, oak for the rest),
+    # for the same reason: a weighted average lets a matching sweetness drag an
+    # opposite-end body back up. Found live: a user-uploaded full-bodied Saperavi
+    # ranked FIRST for "a light red that isn't sweet" (axis agreement 0.667 with body
+    # at the far end). One level keeps the honest near-miss ("a little fuller").
+    third_axis_tolerance_levels: int = 1
     max_match_distance: float = 0.6
 
     # --- engine ----------------------------------------------------------
@@ -87,6 +93,14 @@ class Settings(BaseSettings):
     model_rewriter: str = "claude-haiku-5-5"
     model_verifier: str = "claude-haiku-5-5"
     model_generator: str = "claude-sonnet-5-5"
+    # Per-workflow generators. Interview answers are Sonnet; refine is Opus (the delta
+    # has to be read against what the user saw, which is the hardest judgement in the
+    # product); recommend is Sonnet and escalates to Opus only on a complex turn - see
+    # `workflows/ask.py::choose_generator`.
+    model_interview: str = "claude-sonnet-5-5"
+    model_recommend: str = "claude-sonnet-5-5"
+    model_recommend_complex: str = "claude-opus-5-5"
+    model_refine: str = "claude-opus-5-5"
 
     # Which provider the orchestrated engine's gateway calls.
     #
@@ -119,14 +133,37 @@ class Settings(BaseSettings):
     model_server_fallbacks: bool = True
 
     # Retrieval knobs (band 2).
-    retriever_k: int = 50
+    # Top-K per text arm (dense and BM25). 25 of a 45-row corpus whose largest style
+    # has 13 rows means every in-style row reaches the reranker today; the setting is
+    # sized for the corpus band 4 will ship, not this one.
+    retriever_k: int = 25
     rrf_k: int = 60
     mmr_lambda: float = 0.7
+    # Rows handed to augmentation after rerank. Recommend/refine need room for MMR to
+    # pick 3-5 distinct varieties; an interview suggestion needs fewer.
     rerank_top_n: int = 10
+    interview_top_n: int = 3
+    # Dense store and reranker. `auto` uses embedded Qdrant + fastembed (bge-base,
+    # 768-d) and a local ONNX cross-encoder when the `retrieval` extra is installed,
+    # and the dependency-free hashed embedder + feature scorer when it is not - so the
+    # base install still boots with no network.
+    retrieval_backend: Literal["auto", "qdrant", "local"] = "auto"
+    qdrant_path: str = ""  # empty = in-memory; the corpus is rebuilt at boot anyway
+    embedding_model: str = "BAAI/bge-base-en-v1.5"
+    reranker_model: str = "BAAI/bge-reranker-base"
+    # Final rerank score = w * cross-encoder logit (min-max normalised over the
+    # candidate set) + (1 - w) * axis agreement. A text cross-encoder cannot see that
+    # "dry" and "sweet" are opposites on a labelled axis; the axis term can.
+    cross_encoder_weight: float = 0.6
+    # Absolute floor on sigmoid(logit): rows the cross-encoder judges below this are
+    # dropped after ordering. bge-reranker-base is compressed - a clearly relevant
+    # wine scored ~0.07, an unrelated one ~0.001 - so the floor sits low. It never
+    # empties the list; abstention stays with the gate. 0 disables it.
+    rerank_min_relevance: float = 0.005
     context_token_budget: int = 8000
-    # 384-d matches the bi-encoder the diagram specifies, so the offline embedder and a
-    # real one are swappable without rebuilding the index shape.
-    embedding_dim: int = 384
+    # 768-d matches bge-base-en-v1.5, so the offline hashed embedder and the real one
+    # produce the same index shape and stay swappable.
+    embedding_dim: int = 768
     # Stage K. On by default: the verifier is the last thing standing between a model
     # and an unsourced claim, and it runs on the cheapest tier.
     verify_enabled: bool = True
@@ -137,6 +174,31 @@ class Settings(BaseSettings):
     cost_ceiling_per_session_usd: float = 0.50
     cost_ceiling_global_daily_usd: float = 10.00
     turn_cache_enabled: bool = True
+
+    # --- taste ingestion (POST /api/v1/tastes) ---------------------------
+    # A user-uploaded tasting note is either KNOWN (the reranker matches it to an
+    # existing row) or UNKNOWN (an LLM profiles it and a web search enriches it).
+    # Either way it is embedded and upserted into the vector store as an
+    # `unreviewed` row; the frozen dataset file is never modified.
+    ingest_enabled: bool = True
+    # Calibrated cross-encoder relevance (sigmoid of the logit) at or above which the
+    # top match counts as KNOWN. bge-reranker-base is compressed - a clearly relevant
+    # row scores ~0.07 - so this sits well under 0.5. Without a cross-encoder, only an
+    # explicitly named variety makes a taste known.
+    ingest_known_min_relevance: float = 0.05
+    ingest_candidates_k: int = 20
+    # Model that profiles an unknown taste (structured output, enum-constrained axes).
+    model_ingest_profile: str = "claude-sonnet-5-5"
+    # Model that runs the server-side web search tool for an unknown taste.
+    model_ingest_search: str = "claude-sonnet-5-5"
+    web_search_enabled: bool = True
+    web_search_max_uses: int = 3
+    # Append-only JSONL of ingested rows, replayed at boot so uploads survive a
+    # restart. Empty = <backend>/data/ingested_tastes.jsonl.
+    ingest_store_path: str = ""
+    # Upper bound on an uploaded note, in characters.
+    ingest_max_chars: int = 1200
+
     turn_cache_ttl_seconds: int = 3600
     turn_cache_max_entries: int = 512
 
@@ -145,6 +207,12 @@ class Settings(BaseSettings):
         if self.dataset_path:
             return Path(self.dataset_path).expanduser().resolve()
         return Path(__file__).resolve().parent / "dataset" / "seed" / "wines.seed.json"
+
+    @property
+    def resolved_ingest_store_path(self) -> Path:
+        if self.ingest_store_path:
+            return Path(self.ingest_store_path).expanduser().resolve()
+        return Path(__file__).resolve().parents[2] / "data" / "ingested_tastes.jsonl"
 
 
 @lru_cache

@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { AgeGateScreen } from "@/components/agegate/AgeGateScreen";
 import { AppShell } from "@/app/layouts/AppShell";
 import { DatasetUnavailable } from "@/components/states/DatasetUnavailable";
+import { unavailableReason } from "@/lib/unavailable";
 import { NotFound } from "@/components/states/NotFound";
 import { SkeletonText } from "@/components/ui/Skeleton";
 import { useAgeStatus } from "@/hooks/useAgeGate";
@@ -24,11 +25,24 @@ function Gate() {
   const ready = useReady();
   const age = useAgeStatus();
 
+  const retry = () => {
+    void ready.refetch();
+    void age.refetch();
+  };
+
   if (ready.isLoading) return <Booting />;
+  // Only a real "not ready" answer means the dataset is missing; a 429 or a dead
+  // server is a different problem and gets a different screen.
+  if (ready.isError) {
+    return <DatasetUnavailable reason={unavailableReason(ready.error)} onRetry={retry} />;
+  }
   if (ready.data?.status !== "ready" || age.data === "unavailable") {
-    return <DatasetUnavailable onRetry={() => void ready.refetch()} />;
+    return <DatasetUnavailable reason={{ kind: "dataset" }} onRetry={retry} />;
   }
   if (age.isLoading) return <Booting />;
+  if (age.isError) {
+    return <DatasetUnavailable reason={unavailableReason(age.error)} onRetry={retry} />;
+  }
   if (age.data === "required") {
     return <Navigate to="/age" replace state={{ from: location.pathname }} />;
   }

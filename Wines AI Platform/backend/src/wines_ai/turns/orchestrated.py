@@ -66,7 +66,9 @@ class OrchestratedEngine:
         self.settings = settings
         # Both are built once at lifespan and injected. Building the vector and BM25
         # indexes per turn would be the kind of mistake that only shows up as latency.
-        self.indexes = indexes or build_indexes(index, dim=settings.embedding_dim)
+        self.indexes = indexes or build_indexes(
+            index, dim=settings.embedding_dim, settings=settings
+        )
         self.gateway = gateway or build_gateway(settings)
 
     @property

@@ -12,7 +12,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import errors
-from .api.v1 import age_gate, conversations, feedback, health, meta, turns
+from .api.v1 import age_gate, conversations, feedback, health, meta, tastes, turns
 from .config import Settings, get_settings
 from .db.engine import create_all, create_engine
 from .db.repositories import logs as logs_repo
@@ -98,6 +98,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     v1.include_router(conversations.router)
     v1.include_router(turns.router)
     v1.include_router(feedback.router)
+    v1.include_router(tastes.router)
     app.include_router(v1)
 
     @app.get("/", include_in_schema=False)

@@ -53,6 +53,8 @@ export async function problemFrom(response: Response): Promise<ApiProblem> {
     };
   }
   if (!body.code) body.code = response.status === 429 ? "rate_limited" : "http_error";
-  if (!body.status) body.status = response.status;
+  // Always the HTTP status: /readyz puts a string ("not_ready") in `status`, which
+  // would otherwise shadow the 503 that actually says what happened.
+  body = { ...body, status: response.status };
   return new ApiProblem(body, Number.isFinite(retryAfter) ? retryAfter : null);
 }

@@ -15,6 +15,11 @@ BACKEND = Path(__file__).resolve().parents[1]
 SRC = BACKEND / "src"
 sys.path.insert(0, str(SRC))
 
+# The suite's ranking assertions were written against the dependency-free retrieval
+# path. The Qdrant + cross-encoder path has its own tests (test_workflows_rag.py),
+# which opt in explicitly and skip when the `retrieval` extra is not installed.
+os.environ.setdefault("WA_RETRIEVAL_BACKEND", "local")
+
 
 def _free_port() -> int:
     with socket.socket() as s:
@@ -52,6 +57,7 @@ def settings(tmp_path, monkeypatch):
 
     _isolate_env(monkeypatch)
     monkeypatch.setenv("WA_DATABASE_URL", f"sqlite+aiosqlite:///{tmp_path}/test.db")
+    monkeypatch.setenv("WA_INGEST_STORE_PATH", str(tmp_path / "ingested.jsonl"))
     monkeypatch.setenv("WA_STREAM_TOKEN_DELAY_MS", "0")
     monkeypatch.setenv("WA_RATE_LIMIT_TURNS_PER_MIN", "500")
     monkeypatch.setenv("WA_RATE_LIMIT_READS_PER_MIN", "2000")
@@ -72,6 +78,7 @@ def demo_settings(tmp_path, monkeypatch):
 
     _isolate_env(monkeypatch)
     monkeypatch.setenv("WA_DATABASE_URL", f"sqlite+aiosqlite:///{tmp_path}/test.db")
+    monkeypatch.setenv("WA_INGEST_STORE_PATH", str(tmp_path / "ingested.jsonl"))
     monkeypatch.setenv("WA_DATASET_PATH", str(DEMO_ARTIFACT))
     monkeypatch.setenv("WA_STREAM_TOKEN_DELAY_MS", "0")
     monkeypatch.setenv("WA_RATE_LIMIT_TURNS_PER_MIN", "500")
@@ -135,6 +142,7 @@ def server(tmp_path_factory):
         "WA_ENGINE": "deterministic",
         "WA_LLM_PROVIDER": "offline",
         "WA_DATABASE_URL": f"sqlite+aiosqlite:///{db}",
+        "WA_INGEST_STORE_PATH": str(db.parent / "ingested.jsonl"),
         "WA_STREAM_TOKEN_DELAY_MS": "3",
         "WA_RATE_LIMIT_TURNS_PER_MIN": "500",
         "WA_RATE_LIMIT_READS_PER_MIN": "2000",
@@ -235,6 +243,7 @@ def orchestrated_settings(tmp_path, monkeypatch):
 
     _isolate_env(monkeypatch)
     monkeypatch.setenv("WA_DATABASE_URL", f"sqlite+aiosqlite:///{tmp_path}/test.db")
+    monkeypatch.setenv("WA_INGEST_STORE_PATH", str(tmp_path / "ingested.jsonl"))
     monkeypatch.setenv("WA_ENGINE", "orchestrated")
     monkeypatch.setenv("WA_STREAM_TOKEN_DELAY_MS", "0")
     monkeypatch.setenv("WA_RATE_LIMIT_TURNS_PER_MIN", "500")

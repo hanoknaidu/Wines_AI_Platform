@@ -1,0 +1,7 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+
+# User-uploaded tasting notes (taste ingestion store)
+Wines AI Platform/backend/data/

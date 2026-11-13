@@ -41,6 +41,18 @@ class DatasetIndex:
         """The grounding guard's lookup. If this returns None the claim does not ship."""
         return self.by_row_id.get(row_id)
 
+    def add_row(self, row: WineRow) -> None:
+        """Admit an ingested row at runtime. Idempotent on row_id.
+
+        The frozen artifact on disk is untouched: ingested rows live in memory and in
+        the ingest store, and are replayed onto this index at boot.
+        """
+        if row.row_id in self.by_row_id:
+            return
+        self.rows.append(row)
+        self.by_row_id[row.row_id] = row
+        self.by_style.setdefault(row.style, []).append(row)
+
     def for_style(self, style: str) -> list[WineRow]:
         return self.by_style.get(style, [])
 

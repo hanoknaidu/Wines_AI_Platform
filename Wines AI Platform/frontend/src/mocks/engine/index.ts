@@ -27,7 +27,7 @@ export const BUILT_AT = DATASET.built_at;
 /** Mirrors of `config.py`. */
 const MAX_INTERVIEW_QUESTIONS = 3;
 const RESULTS_MIN = 3;
-const RESULTS_MAX = 5;
+const RESULTS_MAX = 3;
 const SWEETNESS_TOLERANCE_LEVELS = 1;
 const MAX_MATCH_DISTANCE = 0.6;
 

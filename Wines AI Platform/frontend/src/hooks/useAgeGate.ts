@@ -22,6 +22,10 @@ export function useAgeStatus() {
     },
     retry: false,
     staleTime: 60_000,
+    // The gate tells the user it "recovers on its own" after a 429 or an outage; that is
+    // only true if this check is retried. Without it the gate stays stuck after the
+    // backend is healthy again.
+    refetchInterval: (query) => (query.state.status === "error" ? 3000 : false),
   });
 }
 

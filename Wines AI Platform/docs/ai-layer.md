@@ -317,6 +317,41 @@ verifier) still use the Anthropic SDK provider.
 - `langchain-anthropic` is in the `orchestrator` extra beside `anthropic`; the base
   install is unchanged.
 
+## 7b. Workflows on the RAG pipeline (2026-11-12)
+
+All three workflows now share one pipeline: **guarded rewrite → hybrid retrieval →
+cross-encoder rerank → augmentation → generation**.
+
+| | Interview | Recommend | Refine |
+|---|---|---|---|
+| Trigger for RAG | the user types a taste instead of tapping a chip | profile sufficient | correction after results |
+| Rewrite | Haiku, `rewrite@2` | Haiku, `rewrite@2` | Haiku, `rewrite@2` |
+| Retrieval | dense (Qdrant) top-25 + BM25 top-25 + axis floor, RRF-merged | same | same, plus the rows shown, widened sweetness band |
+| Rerank → context | top 5 | top 10 → MMR → 3–5 cards | top 10 → MMR → 3–5 cards |
+| Generator | **Sonnet 5.5** (`interview_suggest@1`) | **Sonnet 5.5**, **Opus 5.5** when complex | **Opus 5.5** |
+| Other model calls | — | — | Opus `refine_delta@1`, only when the lexical reader cannot read the correction |
+
+- **`rewrite@2` guardrails.** Empty history → no call at all (`source: skipped`).
+  A message that stands alone, or is independent of the history, comes back verbatim:
+  `decision: standalone` is enforced in code, so a model paraphrase is discarded.
+  Only `decision: rewritten` replaces the query. Reasoning is the first field.
+- **Interview.** A chip press is unchanged: no model, no retrieval. A typed taste
+  (router slots, a consumer taste word, or any corpus term) gets 2–4 sentences of
+  grounded suggestions citing `[row_id]`, then the next chip question. Citations are
+  checked structurally; a foreign id is logged and not emitted.
+- **Recommend escalation** (`ask.choose_generator`): Opus when the turn decomposes into
+  2+ requests, asks for a comparison or a pairing, or a chosen row misses the stated
+  sweetness. Otherwise Sonnet. Recorded in the `generator` checkpoint.
+- **Opus 5.5 cannot disable thinking**, so it runs adaptive at effort `low`, and the
+  prose prompts' `max_tokens` is now 2048 (a cap, not a charge).
+- **Backend.** `WA_RETRIEVAL_BACKEND=auto|qdrant|local`. `auto` uses the `retrieval`
+  extra when installed and falls back to the hashed embedder + feature scorer
+  otherwise. Rerank score = 0.6 × min-max(cross-encoder) + 0.4 × axis agreement,
+  because a text cross-encoder cannot tell that `sweetness=dry` contradicts "sweet".
+  The test suite pins `local` so its ranking assertions stay deterministic.
+- **K = 25 on a 45-row corpus** returns every row of the requested style (13 at most),
+  so today the reranker sees the whole eligible set. The setting is sized for band 4.
+
 ## 8. Verified
 
 | | |
