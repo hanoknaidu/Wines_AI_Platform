@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Stream Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  :root {
+    --bg: #12151A;
+    --panel: #1A1F26;
+    --panel-hover: #212831;
+    --line: #2A313B;
+    --amber: #E8A33D;
+    --amber-dim: #6B5430;
+    --text: #E9EBEE;
+    --text-dim: #8A93A0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    min-height: 100vh;
+  }
+
+  .frame {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  aside {
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    padding: 28px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .brand span { color: var(--amber); }
+
+  .brand-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 32px;
+  }
+
+  nav ul { list-style: none; }
+  nav li { margin-bottom: 4px; }
+
+  nav button {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    padding: 9px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  nav button:hover { background: var(--panel-hover); color: var(--text); }
+  nav button.active { background: var(--panel-hover); color: var(--amber); }
+
+  nav button .ch-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    width: 22px;
+  }
+  nav button.active .ch-num { color: var(--amber); }
+
+  .sidebar-note {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* Main content */
+  main {
+    padding: 40px 48px 60px;
+    max-width: 900px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+
+  .section-head h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1.6rem;
+  }
+
+  .section-head .count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+
+  .section-desc {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    margin-bottom: 28px;
+    max-width: 62ch;
+    line-height: 1.5;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.15s, transform 0.1s;
+  }
+
+  .card:hover { border-color: var(--amber-dim); }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.02rem;
+    font-weight: 600;
+  }
+
+  .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.64rem;
+    color: var(--amber);
+    border: 1px solid var(--amber-dim);
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .card p {
+    color: var(--text-dim);
+    font-size: 0.84rem;
+    line-height: 1.45;
+    flex-grow: 1;
+  }
+
+  .card a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.85rem;
+    background: var(--panel-hover);
+    border: 1px solid var(--line);
+    padding: 7px 0;
+    border-radius: 6px;
+    text-align: center;
+    margin-top: 6px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .card a:hover { background: var(--amber-dim); border-color: var(--amber); color: #fff; }
+
+  .panel-hidden { display: none; }
+
+  @media (max-width: 720px) {
+    .frame { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+    main { padding: 28px 20px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <aside>
+    <div class="brand">stream<span>guide</span></div>
+    <div class="brand-sub">FREE &amp; LEGAL ONLY</div>
+
+    <nav>
+      <ul>
+        <li><button class="nav-btn active" data-panel="movies"><span class="ch-num">01</span>Movies &amp; TV</button></li>
+        <li><button class="nav-btn" data-panel="news"><span class="ch-num">02</span>News</button></li>
+        <li><button class="nav-btn" data-panel="sports"><span class="ch-num">03</span>Sports</button></li>
+        <li><button class="nav-btn" data-panel="entertainment"><span class="ch-num">04</span>Entertainment</button></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-note">
+      All ad-supported, no subscription, no card required. Catalogs rotate monthly — check back often.
+    </div>
+  </aside>
+
+  <main>
+
+    <section id="panel-movies">
+      <div class="section-head"><h1>Movies &amp; TV</h1><span class="count">6 services</span></div>
+      <p class="section-desc">On-demand libraries — the closest thing to a free Netflix. Best for planned watching rather than channel surfing.</p>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-top"><h3>Tubi</h3><span class="badge">ad-supported</span></div>
+          <p>Largest free on-demand catalog — 50,000+ movies and episodes, strong across every genre.</p>
+          <a href="https://tubitv.com" target="_blank">Open Tubi ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>The Roku Channel</h3><span class="badge">ad-supported</span></div>
+          <p>Free movies, shows, and Roku Originals. Works in any browser, not just Roku devices.</p>
+          <a href="https://therokuchannel.roku.com" target="_blank">Open Roku Channel ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Freevee</h3><span class="badge">ad-supported</span></div>
+          <p>Amazon's free tier — originals plus a solid licensed catalog, no Prime required.</p>
+          <a href="https://www.amazon.com/adlp/freevee" target="_blank">Open Freevee ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Crackle</h3><span class="badge">ad-supported</span></div>
+          <p>Smaller catalog, decent for older action and cult titles.</p>
+          <a href="https://www.crackle.com" target="_blank">Open Crackle ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Kanopy</h3><span class="badge">library card</span></div>
+          <p>No ads at all — funded by your public library. Best for arthouse, indie, and classic film.</p>
+          <a href="https://www.kanopy.com" target="_blank">Open Kanopy ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Hoopla</h3><span class="badge">library card</span></div>
+          <p>Also library-funded — broader mainstream mix than Kanopy, including some TV series.</p>
+          <a href="https://www.hoopladigital.com" target="_blank">Open Hoopla ↗</a>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="panel-news" class="panel-hidden">
+      <div class="section-head"><h1>News</h1><span class="count">6 services</span></div>
+      <p class="section-desc">Official 24/7 network streams and local-news aggregators — all direct from the broadcasters, no login needed.</p>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-top"><h3>ABC News Live</h3><span class="badge">national</span></div>
+          <p>ABC's free 24/7 live news stream.</p>
+          <a href="https://abcnews.go.com/live" target="_blank">Open ABC News Live ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>CBS News 24/7</h3><span class="badge">national</span></div>
+          <p>Continuous live coverage direct from CBS News.</p>
+          <a href="https://www.cbsnews.com/live/" target="_blank">Open CBS News 24/7 ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>NBC News NOW</h3><span class="badge">national</span></div>
+          <p>NBC's free rolling news channel.</p>
+          <a href="https://www.nbcnews.com/now" target="_blank">Open NBC News NOW ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Local Now</h3><span class="badge">local</span></div>
+          <p>Local news and weather by zip code, plus lifestyle FAST channels.</p>
+          <a href="https://www.localnow.com" target="_blank">Open Local Now ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>NewsON</h3><span class="badge">local</span></div>
+          <p>Live and on-demand local newscasts from stations across the country.</p>
+          <a href="https://newson.us" target="_blank">Open NewsON ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Haystack News</h3><span class="badge">local + topical</span></div>
+          <p>Personalized local and topic-based news channels.</p>
+          <a href="https://haystack.tv" target="_blank">Open Haystack News ↗</a>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="panel-sports" class="panel-hidden">
+      <div class="section-head"><h1>Sports</h1><span class="count">3 services</span></div>
+      <p class="section-desc">The weakest free category — expect studio shows, replays, and niche events rather than marquee live games. An antenna beats all of these for local broadcast sports.</p>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-top"><h3>Pluto TV</h3><span class="badge">FAST channels</span></div>
+          <p>Carries Fox Sports and an NFL channel in its live guide, alongside classic games and highlights.</p>
+          <a href="https://pluto.tv" target="_blank">Open Pluto TV ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>The Roku Channel</h3><span class="badge">FAST channels</span></div>
+          <p>Sports-adjacent programming mixed into its 500+ live channel guide.</p>
+          <a href="https://therokuchannel.roku.com" target="_blank">Open Roku Channel ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Tubi</h3><span class="badge">live channels</span></div>
+          <p>Has a live sports section within its guide, mostly secondary events and replays.</p>
+          <a href="https://tubitv.com/live" target="_blank">Open Tubi Live ↗</a>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="panel-entertainment" class="panel-hidden">
+      <div class="section-head"><h1>Entertainment</h1><span class="count">5 services</span></div>
+      <p class="section-desc">Channel-surfing FAST platforms — the closest thing to a free cable guide, best for background viewing.</p>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-top"><h3>Pluto TV</h3><span class="badge">250+ channels</span></div>
+          <p>The classic pick — traditional guide layout, no sign-up needed to start watching.</p>
+          <a href="https://pluto.tv" target="_blank">Open Pluto TV ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Sling Freestream</h3><span class="badge">broadest guide</span></div>
+          <p>Advertises the largest free live-TV lineup, plus a limited DVR feature.</p>
+          <a href="https://www.sling.com/freestream" target="_blank">Open Sling Freestream ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Xumo Play</h3><span class="badge">no account needed</span></div>
+          <p>Jump straight in — nothing to register, nothing to remember.</p>
+          <a href="https://www.xumo.tv" target="_blank">Open Xumo Play ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Samsung TV Plus</h3><span class="badge">web + Samsung TVs</span></div>
+          <p>Built into Samsung hardware, but also works from a browser on any device.</p>
+          <a href="https://www.samsung.com/us/tv-plus/" target="_blank">Open Samsung TV Plus ↗</a>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><h3>Plex</h3><span class="badge">international mix</span></div>
+          <p>Free live channels plus on-demand — good variety of international content.</p>
+          <a href="https://www.plex.tv/watch-free-live-tv/" target="_blank">Open Plex ↗</a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const buttons = document.querySelectorAll('.nav-btn');
+  const panels = {
+    movies: document.getElementById('panel-movies'),
+    news: document.getElementById('panel-news'),
+    sports: document.getElementById('panel-sports'),
+    entertainment: document.getElementById('panel-entertainment'),
+  };
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      Object.values(panels).forEach(p => p.classList.add('panel-hidden'));
+      panels[btn.dataset.panel].classList.remove('panel-hidden');
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Secrets: .env holds real credentials and must never enter a layer.
+.env
+.env.*
+!.env.example
+
+# Local state (SQLite db, ingested tastes) and the host virtualenv (darwin-arm64).
+var/
+data/
+.venv/
+
+# Not part of the running service.
+tests/
+alembic/
+alembic.ini
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+.git
+.gitignore
+
+Dockerfile
+.dockerignore
+DOCKER.md
+*.log
+.DS_Store
+.idea
+.vscode
