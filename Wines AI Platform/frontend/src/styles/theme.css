@@ -1,0 +1,113 @@
+/* Wines AI design tokens — the only file in src/ allowed to contain a hex value.
+ *
+ * Every token sits in a Tailwind v4 @theme namespace, so each one is both a CSS custom
+ * property and a utility class: --color-canvas gives bg-canvas, --font-note gives
+ * font-note, --radius-card gives rounded-card. One source of truth, consumed two ways.
+ * A parallel theme.ts would be a second source that drifts the first time someone is
+ * in a hurry.
+ *
+ * Direction: warm, editorial, quiet. Good printed matter, not a dashboard. The garnet
+ * accent is deliberately rationed — it should land on roughly 5% of the pixels.
+ */
+
+@theme {
+  /* --- neutrals: warm, paper-like ---------------------------------- */
+  --color-canvas: #faf8f5;
+  --color-surface: #ffffff;
+  --color-sunken: #f2eee8;
+  --color-line: #e6e0d8;
+  --color-line-strong: #d2c9bc;
+
+  --color-ink: #1c1917;
+  --color-muted: #57534e;
+  --color-subtle: #857e75;
+
+  /* --- brand: garnet. Warmth and authority, no purple -------------- */
+  --color-brand-900: #4a1324;
+  --color-brand-700: #6b1b30;
+  --color-brand-600: #8a2440;
+  --color-brand-500: #a8384f;
+  --color-brand-100: #f7e4e7;
+  --color-brand-50: #fcf3f4;
+
+  /* --- style accents ----------------------------------------------- *
+   * Dots, 1px borders and low-alpha tints ONLY. --color-style-rose is 4.0:1 on
+   * white, under AA for small text, and five hues cannot distinguish five styles
+   * for anyone colour-blind however good the contrast. So the style is always
+   * also spelled out in words beside the dot: colour never carries meaning alone.
+   */
+  --color-style-red: #8a2440;
+  --color-style-white: #96761b;
+  --color-style-rose: #c05470;
+  --color-style-sparkling: #46707f;
+  --color-style-dessert: #8a5520;
+
+  /* --- semantic ----------------------------------------------------- *
+   * Amber means "needs your attention", which is why a hedged axis reading must
+   * not borrow it: a hedge is the system being honest on a normal day, and
+   * painting it amber would teach the user that honesty is a warning. Amber is
+   * for an unreviewed dataset row and a degraded engine. Nothing else.
+   */
+  --color-ok-fg: #15803d;
+  --color-ok-bg: #f0fdf4;
+  --color-ok-br: #bbf7d0;
+
+  --color-caution-fg: #92400e;
+  --color-caution-bg: #fffbeb;
+  --color-caution-br: #fde68a;
+
+  --color-danger-fg: #991b1b;
+  --color-danger-bg: #fef2f2;
+  --color-danger-br: #fecaca;
+
+  --color-info-fg: #1d4ed8;
+  --color-info-bg: #eff6ff;
+  --color-info-br: #bfdbfe;
+
+  /* --- type --------------------------------------------------------- *
+   * System stacks, no webfont: NFR-4's posture is no outbound calls at runtime,
+   * and a Google Fonts link would break that in the client while the backend
+   * holds the line. The serif is load-bearing rather than decorative — the
+   * tasting note is the one field drawn verbatim from the dataset, and setting it
+   * in a different voice says so without a label.
+   */
+  --font-ui:
+    ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-note:
+    ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-micro: 0.75rem;
+  --text-micro--line-height: 1.4;
+  --text-chip: 0.8125rem;
+  --text-chip--line-height: 1.4;
+  --text-why: 0.9375rem;
+  --text-why--line-height: 1.6;
+  --text-prose: 1rem;
+  --text-prose--line-height: 1.65;
+  --text-note: 1rem;
+  --text-note--line-height: 1.6;
+  --text-variety: 1.375rem;
+  --text-variety--line-height: 1.25;
+  --text-display: 1.75rem;
+  --text-display--line-height: 1.2;
+
+  /* --- shape -------------------------------------------------------- */
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-modal: 16px;
+
+  /* --- elevation: two, both subtle. Borders carry the rest. --------- */
+  --shadow-pop: 0 1px 2px rgb(28 25 23 / 0.06), 0 4px 12px rgb(28 25 23 / 0.06);
+  --shadow-modal: 0 8px 24px rgb(28 25 23 / 0.12);
+
+  /* --- motion ------------------------------------------------------- */
+  --ease-soft: cubic-bezier(0.2, 0, 0.2, 1);
+
+  /* --- layout ------------------------------------------------------- */
+  --spacing-sidebar: 288px;
+  --spacing-panel: 300px;
+  --spacing-measure: 760px;
+  --spacing-topbar: 52px;
+}

@@ -1,0 +1,2 @@
+# Everything this needs. Nothing from the Wines AI backend.
+langchain-anthropic>=1.7
