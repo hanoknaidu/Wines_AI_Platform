@@ -1,0 +1,150 @@
+name: CI
+
+# Runs on every PR into main (the merge gate) and again on main after merge.
+# No path filters on purpose: these jobs are required status checks, and a
+# filtered-out required check never reports, which blocks the PR forever.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A newer push to the same PR cancels the older run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  UV_VERSION: "0.9.7"      # same uv as the Dockerfile
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"       # same Node as frontend/Dockerfile
+
+jobs:
+  # ---------------------------------------------------------------- backend
+  backend-lint:
+    name: Backend / lint & format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Lockfile matches pyproject
+        run: uv lock --check
+      - name: ruff check
+        run: uv run --frozen --extra dev ruff check . --output-format github
+      - name: ruff format --check
+        run: uv run --frozen --extra dev ruff format --check --diff .
+
+  backend-test:
+    name: Backend / unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      # `orchestrator` is needed by tests/test_langchain_router.py. No API key is
+      # set: the suite runs on the offline provider and makes no network calls.
+      - name: Install
+        run: uv sync --frozen --extra dev --extra orchestrator
+      - name: pytest
+        run: >
+          uv run --frozen --extra dev --extra orchestrator
+          --with pytest-cov --with pytest-html
+          pytest
+          --junitxml=reports/junit.xml
+          --html=reports/tests.html --self-contained-html
+          --cov=wines_ai --cov-report=term --cov-report=html:reports/coverage
+      - name: Upload HTML reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: backend/reports/
+          retention-days: 14
+      - name: Test summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import xml.etree.ElementTree as ET
+          r = ET.parse("reports/junit.xml").getroot()
+          s = r if r.tag == "testsuite" else r.find("testsuite")
+          print("### Backend tests")
+          print(f"tests: {s.get('tests')} · failures: {s.get('failures')} · errors: {s.get('errors')} · skipped: {s.get('skipped')}")
+          print("\nHTML test + coverage reports: see the `backend-test-reports` artifact.")
+          PY
+
+  backend-docker:
+    name: Backend / docker build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: false
+          tags: wines-ai-backend:ci
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+  # --------------------------------------------------------------- frontend
+  frontend-checks:
+    name: Frontend / typecheck, lint, unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: ESLint
+        run: npm run lint
+      - name: Unit tests (vitest)
+        run: npm test
+
+  frontend-docker:
+    name: Frontend / docker build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend
+          push: false
+          tags: wines-ai-frontend:ci
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
