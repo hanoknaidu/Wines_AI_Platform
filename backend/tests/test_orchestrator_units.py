@@ -641,3 +641,39 @@ def test_the_card_fan_out_is_bounded_as_a_group():
     assert asyncio.run(_fan_out(ctx, requests, fallbacks)) == fallbacks
     assert calls["n"] == 0
     assert ctx.state.degraded_reason == "turn_budget"
+
+
+class _LogitScorer:
+    """A cross-encoder stand-in that returns fixed logits, keyed by row position."""
+
+    def __init__(self, logits):
+        self._logits = logits
+
+    def score_logits(self, query, documents):
+        return list(self._logits[: len(documents)])
+
+
+def _candidates(index, n):
+    return [Candidate(row=r) for r in index.rows[:n]]
+
+
+def test_rerank_orders_by_logit_and_floors_by_calibrated_relevance(index):
+    # sigmoid: 2.0 -> 0.88, -2.0 -> 0.12, -8.0 -> 0.0003 (below a 0.005 floor)
+    cands = _candidates(index, 3)
+    out = rerank(
+        cands, query="q", profile={}, top_n=10,
+        cross_encoder=_LogitScorer([-2.0, 2.0, -8.0]), ce_weight=1.0, min_relevance=0.005,
+    )
+    assert [c.row_id for c in out] == [cands[1].row_id, cands[0].row_id]
+    assert out[0].rerank == 1.0  # min-max over logits keeps the ordering's full range
+    assert 0.0 <= out[1].arm_scores["cross_encoder"] <= 1.0
+    assert out[1].arm_scores["cross_encoder_logit"] == -2.0
+
+
+def test_the_relevance_floor_never_empties_the_list(index):
+    cands = _candidates(index, 3)
+    out = rerank(
+        cands, query="q", profile={}, top_n=10,
+        cross_encoder=_LogitScorer([-9.0, -10.0, -11.0]), min_relevance=0.5,
+    )
+    assert len(out) == 3  # abstaining is the gate's call, not the reranker's

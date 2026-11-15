@@ -1,7 +1,24 @@
-.DS_Store
+# Secrets. `.env.example` is the committed template; `.env` holds real credentials
+# and must never be tracked.
 .env
+.env.local
+.env.*.local
+.env.docker
+
+# Local state
 .venv/
+backend/var/
+backend/.venv/
+backend/.pytest_cache/
+backend/.ruff_cache/
+frontend/node_modules/
+frontend/dist/
 __pycache__/
+*.pyc
+.DS_Store
+
+# Runtime store written by POST /api/v1/tastes; local state, not source.
+backend/data/ingested_tastes.jsonl
 
 # User-uploaded tasting notes (taste ingestion store)
 Wines AI Platform/backend/data/

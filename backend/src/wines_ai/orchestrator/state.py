@@ -57,6 +57,7 @@ class GraphState:
     unsupported_row_ids: list[str] = field(default_factory=list)
     verify_source: str = ""
     degraded_reason: str | None = None
+    generator_model: str = ""
     nodes_run: list[str] = field(default_factory=list)
 
     def snapshot(self) -> dict:
@@ -78,6 +79,7 @@ class GraphState:
             "unsupported_row_ids": list(self.unsupported_row_ids),
             "verify_source": self.verify_source,
             "degraded_reason": self.degraded_reason,
+            "generator_model": self.generator_model,
             "nodes_run": list(self.nodes_run),
         }
 
@@ -101,6 +103,10 @@ class Context:
             "rewriter": self.settings.model_rewriter,
             "verifier": self.settings.model_verifier,
             "generator": self.settings.model_generator,
+            "interview": self.settings.model_interview,
+            "recommend": self.settings.model_recommend,
+            "recommend_complex": self.settings.model_recommend_complex,
+            "refine": self.settings.model_refine,
         }
 
 

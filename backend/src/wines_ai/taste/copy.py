@@ -24,6 +24,10 @@ _MATCH_PHRASES = {
     ("oak", "pronounced"): "you wanted rounded and buttery, and this is oak-aged",
 }
 
+# Said once before re-asking a question the last answer did not settle, so a repeated
+# prompt never reads as the product ignoring the user.
+NOT_UNDERSTOOD = "I could not tell your answer from that. Pick one below, or put it another way. "
+
 _NEAR_MISS = {
     "sweetness": "it is a touch {direction} than you asked for",
     "body": "it is a little {direction} than you asked for",

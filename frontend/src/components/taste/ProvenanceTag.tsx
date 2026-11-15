@@ -16,7 +16,7 @@ export function ProvenanceTag({ provenance }: { provenance?: string }) {
     inferred: {
       label: "read from your words",
       icon: <Sparkles size={10} />,
-      className: "text-info-fg",
+      className: "text-muted",
       hint: "Taken from something you typed rather than something you were asked. Say so if it is wrong and it will be corrected.",
     },
     refined: {

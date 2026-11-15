@@ -134,12 +134,20 @@ async def rewrite(
     history: list[dict],
     previous_row_ids: list[str],
 ) -> tuple[str, bool, str]:
-    """-> (standalone query, resolved, source).
+    """-> (query, rewritten, source).
 
-    `source` is "model" or "fallback": a rewriter failure must not fail the turn, and
-    an un-rewritten query still retrieves - worse, but it retrieves. The fallback is
-    the profile-derived query, which is the same material the model is given.
+    `source` is one of:
+      * "skipped"  - empty history: nothing to resolve against, so no call is made.
+                     Guardrail 1 of `rewrite@2`, enforced here rather than trusted to
+                     the model, because the cheapest call is the one not made.
+      * "model"    - the model decided; a `standalone` decision returns the utterance
+                     VERBATIM regardless of what the model put in `query` (guardrails
+                     2 and 3: an independent message is never paraphrased).
+      * "fallback" - the call failed; the profile-derived query still retrieves.
     """
+    if not utterance.strip() or not history:
+        return utterance, False, "skipped"
+
     payload = {
         "utterance": utterance,
         "profile": {k: v for k, v in sorted(profile.items()) if v},
@@ -154,10 +162,20 @@ async def rewrite(
         return _fallback_query(utterance, profile), False, "fallback"
 
     data = result.structured or {}
+    decision = str(data.get("decision") or "")
     query = str(data.get("query") or "").strip()
-    if not query:
+    log(
+        logger,
+        logging.INFO,
+        "rewrite_decision",
+        decision=decision or "invalid",
+        reasoning=str(data.get("reasoning") or "")[:200],
+    )
+    if decision == "standalone":
+        return utterance, False, "model"
+    if decision != "rewritten" or not query:
         return _fallback_query(utterance, profile), False, "fallback"
-    return query, bool(data.get("resolved")), "model"
+    return query, True, "model"
 
 
 def _fallback_query(utterance: str, profile: dict) -> str:

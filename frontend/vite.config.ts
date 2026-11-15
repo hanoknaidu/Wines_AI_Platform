@@ -10,7 +10,7 @@ import { fileURLToPath, URL } from "node:url";
 // entrypoint hardcodes it, so when it is taken you run uvicorn on another one:
 //   .venv/bin/python -m uvicorn wines_ai.main:app --port 8001
 //   VITE_BACKEND_ORIGIN=http://127.0.0.1:8001 npm run dev
-const BACKEND = process.env.VITE_BACKEND_ORIGIN ?? "http://127.0.0.1:8000";
+const BACKEND = process.env.VITE_BACKEND_ORIGIN ?? "http://127.0.0.1:8010";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -18,7 +18,8 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
   server: {
-    port: 5173,
+    port: 5180,
+    strictPort: true,
     proxy: {
       "/api": {
         target: BACKEND,
