@@ -182,8 +182,13 @@ class TasteIngestor:
             self.index.add_row(result.row)
             if self.store is not None:
                 await asyncio.to_thread(self.store.append, result.row)
-            trace.append({"stage": "store", "row_id": result.row.row_id,
-                          "vector_store": self.indexes.vector_store is not None})
+            trace.append(
+                {
+                    "stage": "store",
+                    "row_id": result.row.row_id,
+                    "vector_store": self.indexes.vector_store is not None,
+                }
+            )
 
         log(
             logger,
@@ -214,8 +219,14 @@ class TasteIngestor:
                 c.ranks[arm] = rank
                 c.arm_scores[arm] = score
                 c.fused += 1.0 / (self.settings.rrf_k + rank)
-        trace.append({"stage": "retrieve", "dense": len(dense), "sparse": len(sparse),
-                      "candidates": len(candidates)})
+        trace.append(
+            {
+                "stage": "retrieve",
+                "dense": len(dense),
+                "sparse": len(sparse),
+                "candidates": len(candidates),
+            }
+        )
         if not candidates:
             return None, "", False
 
@@ -237,8 +248,14 @@ class TasteIngestor:
             scorer = "feature-scorer"
             variety_terms = {t for t in tokenize(top.row.variety.split("(")[0]) if len(t) > 3}
             known = bool(variety_terms) and variety_terms <= set(tokenize(note))
-        trace.append({"stage": "rerank", "scorer": scorer, "known": known,
-                      "top": [c.trace() | {"variety": c.row.variety} for c in ranked[:3]]})
+        trace.append(
+            {
+                "stage": "rerank",
+                "scorer": scorer,
+                "known": known,
+                "top": [c.trace() | {"variety": c.row.variety} for c in ranked[:3]],
+            }
+        )
         return top, scorer, known
 
     def _row_from_match(self, row_id: str, note: str, matched: WineRow) -> WineRow:
@@ -260,8 +277,14 @@ class TasteIngestor:
     async def _unknown(self, row_id: str, note: str, trace: list[dict]) -> IngestResult:
         degraded: list[str] = []
         profile = await self._profile(note, degraded)
-        trace.append({"stage": "llm_profile", "variety": profile.get("variety"),
-                      "style": profile.get("style"), "confidence": profile.get("confidence")})
+        trace.append(
+            {
+                "stage": "llm_profile",
+                "variety": profile.get("variety"),
+                "style": profile.get("style"),
+                "confidence": profile.get("confidence"),
+            }
+        )
         if not profile.get("is_wine_taste", True):
             raise IngestRejected("That doesn't read as a description of a wine's taste.")
         if profile.get("style") not in STYLES:
@@ -272,8 +295,14 @@ class TasteIngestor:
         )
         if findings.degraded:
             degraded.append(f"web_search: {findings.reason}")
-        trace.append({"stage": "web_search", "searcher": self.searcher.name,
-                      "sources": len(findings.sources), "degraded": findings.degraded})
+        trace.append(
+            {
+                "stage": "web_search",
+                "searcher": self.searcher.name,
+                "sources": len(findings.sources),
+                "degraded": findings.degraded,
+            }
+        )
 
         conf = float(profile.get("confidence") or 0.4)
         conf = min(1.0, max(0.0, conf))
@@ -292,8 +321,12 @@ class TasteIngestor:
             dataset_version=self.index.version,
         )
         return IngestResult(
-            path="unknown", row=row, created=True, sources=findings.sources,
-            trace=trace, degraded=degraded,
+            path="unknown",
+            row=row,
+            created=True,
+            sources=findings.sources,
+            trace=trace,
+            degraded=degraded,
         )
 
     async def _profile(self, note: str, degraded: list[str]) -> dict:
@@ -323,4 +356,3 @@ _UNIDENTIFIED = "Unidentified (user taste)"
 
 def _score_of(c: Candidate) -> float:
     return round(c.arm_scores.get("cross_encoder", c.rerank), 6)
-

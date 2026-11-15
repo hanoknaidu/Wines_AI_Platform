@@ -95,9 +95,7 @@ class QdrantDense:
                 return []
             query_filter = models.Filter(
                 must=[
-                    models.FieldCondition(
-                        key="row_id", match=models.MatchAny(any=sorted(allowed))
-                    )
+                    models.FieldCondition(key="row_id", match=models.MatchAny(any=sorted(allowed)))
                 ]
             )
         hits = self._client.query_points(

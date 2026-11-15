@@ -27,8 +27,6 @@ def _free_port() -> int:
         return int(s.getsockname()[1])
 
 
-
-
 def _isolate_env(monkeypatch):
     """Cut the test suite off from the developer's own `.env`.
 
@@ -46,8 +44,13 @@ def _isolate_env(monkeypatch):
     from wines_ai.config import Settings
 
     monkeypatch.setitem(Settings.model_config, "env_file", None)
-    for name in ("WA_ANTHROPIC_API_KEY", "WA_LLM_PROVIDER", "WA_ENGINE",
-                 "WA_REQUIRE_LLM_PROVIDER", "ANTHROPIC_API_KEY"):
+    for name in (
+        "WA_ANTHROPIC_API_KEY",
+        "WA_LLM_PROVIDER",
+        "WA_ENGINE",
+        "WA_REQUIRE_LLM_PROVIDER",
+        "ANTHROPIC_API_KEY",
+    ):
         monkeypatch.delenv(name, raising=False)
 
 
@@ -150,11 +153,21 @@ def server(tmp_path_factory):
     }
     proc = subprocess.Popen(
         [
-            sys.executable, "-m", "uvicorn", "wines_ai.main:app",
-            "--host", "127.0.0.1", "--port", str(port), "--log-level", "warning",
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "wines_ai.main:app",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            str(port),
+            "--log-level",
+            "warning",
         ],
-        cwd=str(BACKEND), env=env,
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        cwd=str(BACKEND),
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
     )
     base = f"http://127.0.0.1:{port}"
     for _ in range(120):

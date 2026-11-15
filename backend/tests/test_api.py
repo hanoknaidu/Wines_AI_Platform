@@ -12,6 +12,7 @@ KEY = lambda: {"Idempotency-Key": uuid.uuid4().hex}  # noqa: E731
 
 # --- age gate ------------------------------------------------------------
 
+
 @pytest.mark.parametrize(
     "method,path",
     [
@@ -33,8 +34,13 @@ async def test_every_chat_route_is_gated(client, method, path):
 
 @pytest.mark.parametrize(
     "path",
-    ["/api/v1/healthz", "/api/v1/readyz", "/api/v1/meta/taste-axes",
-     "/api/v1/meta/dataset-version", "/openapi.json"],
+    [
+        "/api/v1/healthz",
+        "/api/v1/readyz",
+        "/api/v1/meta/taste-axes",
+        "/api/v1/meta/dataset-version",
+        "/openapi.json",
+    ],
 )
 async def test_open_routes_need_no_age_gate(client, path):
     assert (await client.get(path)).status_code == 200
@@ -58,6 +64,7 @@ async def test_every_response_carries_a_request_id(client):
 
 
 # --- conversations -------------------------------------------------------
+
 
 async def test_create_and_fetch(aged):
     r = await aged.post("/api/v1/conversations", json={})
@@ -114,6 +121,7 @@ async def test_soft_delete_then_404(aged):
 
 # --- session scoping -----------------------------------------------------
 
+
 async def test_sessions_are_isolated(client, settings):
     """FR-12: independent anonymous sessions. Existence is not leaked - 404, not 403."""
     import httpx
@@ -160,6 +168,7 @@ async def test_many_concurrent_sessions(client):
 
 
 # --- turns ---------------------------------------------------------------
+
 
 async def test_idempotency_key_is_required(aged):
     cid = (await aged.post("/api/v1/conversations", json={})).json()["id"]
@@ -216,19 +225,22 @@ async def test_turn_too_long_is_rejected(aged):
 
 # --- the interview, through the API -------------------------------------
 
+
 async def test_interview_fills_the_profile_and_recommends(aged):
     cid = (await aged.post("/api/v1/conversations", json={})).json()["id"]
 
     async def send(content, chip=None):
         r = await aged.post(
             f"/api/v1/conversations/{cid}/messages",
-            json={"content": content, "selected_chip_id": chip}, headers=KEY(),
+            json={"content": content, "selected_chip_id": chip},
+            headers=KEY(),
         )
         assert r.status_code == 202, r.text
         for _ in range(60):
             await asyncio.sleep(0.1)
             if aged._transport.app.state.services.registry.get(r.json()["turn_id"]) is None:
                 return
+
     await send("I want a red", "style:red")
     await send("Not sweet at all", "sweetness:dry")
     await send("Rich and bold", "body:full")
@@ -248,7 +260,8 @@ async def test_feedback_requires_the_row_to_be_cited(aged):
     cid = (await aged.post("/api/v1/conversations", json={})).json()["id"]
     r = await aged.post(
         f"/api/v1/conversations/{cid}/messages",
-        json={"content": "a bold red, not sweet"}, headers=KEY(),
+        json={"content": "a bold red, not sweet"},
+        headers=KEY(),
     )
     for _ in range(60):
         await asyncio.sleep(0.1)
@@ -273,10 +286,17 @@ async def test_feedback_requires_the_row_to_be_cited(aged):
 
 # --- meta ----------------------------------------------------------------
 
+
 async def test_taste_axes_is_the_vocabulary_source(client):
     d = (await client.get("/api/v1/meta/taste-axes")).json()
     assert {a["id"] for a in d["axes"]} == {
-        "style", "sweetness", "body", "oak", "tannin", "acidity", "fruit_savoury"
+        "style",
+        "sweetness",
+        "body",
+        "oak",
+        "tannin",
+        "acidity",
+        "fruit_savoury",
     }
     assert [c["id"] for c in d["refine_chips"]][:2] == ["less_sweet", "sweeter"]
     assert d["confidence_threshold"] == 0.75
@@ -291,6 +311,7 @@ async def test_dataset_version_reports_review_status(client):
 
 
 # --- title validation ----------------------------------------------------
+
 
 async def test_title_is_bounded_on_create_and_patch(aged, settings):
     """`title_max_chars` used to be enforced only on auto-generated titles, so a
@@ -335,6 +356,7 @@ async def test_title_is_trimmed_not_stored_with_padding(aged):
 
 # --- the demo artifact, served through the API ---------------------------
 
+
 async def test_demo_artifact_serves_producers_and_reports_them_as_unverified(demo_aged):
     """Section 9's promise, tested: swapping artifacts is a WA_DATASET_PATH change and
     nothing else. Cards come back with producer names, and every surface that could be
@@ -348,13 +370,15 @@ async def test_demo_artifact_serves_producers_and_reports_them_as_unverified(dem
     async def send(content, chip=None):
         r = await demo_aged.post(
             f"/api/v1/conversations/{cid}/messages",
-            json={"content": content, "selected_chip_id": chip}, headers=KEY(),
+            json={"content": content, "selected_chip_id": chip},
+            headers=KEY(),
         )
         assert r.status_code == 202, r.text
         for _ in range(60):
             await asyncio.sleep(0.1)
             if demo_aged._transport.app.state.services.registry.get(r.json()["turn_id"]) is None:
                 return
+
     await send("I want a red", "style:red")
     await send("Not sweet at all", "sweetness:dry")
     await send("Rich and bold", "body:full")
@@ -376,7 +400,8 @@ async def test_grounding_rewrites_producers_from_the_demo_row(demo_aged):
     cid = (await demo_aged.post("/api/v1/conversations", json={})).json()["id"]
     r = await demo_aged.post(
         f"/api/v1/conversations/{cid}/messages",
-        json={"content": "a bold red, not sweet"}, headers=KEY(),
+        json={"content": "a bold red, not sweet"},
+        headers=KEY(),
     )
     for _ in range(60):
         await asyncio.sleep(0.1)
@@ -407,9 +432,10 @@ async def test_readyz_reports_the_loaded_index(client):
 
 # --- errors --------------------------------------------------------------
 
+
 async def test_errors_are_problem_json_without_stack_traces(aged):
     r = await aged.get("/api/v1/conversations/c-nope")
     assert r.headers["content-type"].startswith("application/problem+json")
     body = r.json()
     assert set(body) >= {"type", "title", "status", "detail", "code", "request_id"}
-    assert "Traceback" not in r.text and "File \"" not in r.text
+    assert "Traceback" not in r.text and 'File "' not in r.text

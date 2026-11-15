@@ -105,9 +105,7 @@ async def test_resume_replays_without_gap_or_duplicate(sse, server):
 
     midpoint = full_seqs[len(full_seqs) // 2]
     tail = await reader.read(cid, midpoint, timeout=10.0)
-    assert all(e["seq"] > midpoint for e in tail if "seq" in e), (
-        "?after= must be exclusive"
-    )
+    assert all(e["seq"] > midpoint for e in tail if "seq" in e), "?after= must be exclusive"
 
 
 async def test_resume_mid_turn_loses_nothing(sse, server):

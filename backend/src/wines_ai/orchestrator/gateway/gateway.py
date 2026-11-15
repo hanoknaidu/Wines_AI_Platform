@@ -256,8 +256,7 @@ class ModelGateway:
                 if ledger.spent_usd + running > ledger.ceiling_usd:
                     self._record_partial(ledger, req, produced, started)
                     raise BudgetExceeded(
-                        f"generator stopped mid-stream at turn ceiling "
-                        f"${ledger.ceiling_usd:.4f}"
+                        f"generator stopped mid-stream at turn ceiling ${ledger.ceiling_usd:.4f}"
                     )
                 yield item
         except BudgetExceeded:

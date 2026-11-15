@@ -1,8 +1,8 @@
 """Band 2: the end-to-end RAG pipeline, stages A to K.
 
-    A rewrite -> B decompose -> C expand -> D plan -> E1/E2/E3 retrieve
-      -> F fuse (RRF) -> G rerank -> H diversify (MMR) -> I pack
-      -> J generate (in the workflow, which owns the event stream) -> K verify
+A rewrite -> B decompose -> C expand -> D plan -> E1/E2/E3 retrieve
+  -> F fuse (RRF) -> G rerank -> H diversify (MMR) -> I pack
+  -> J generate (in the workflow, which owns the event stream) -> K verify
 """
 
 from __future__ import annotations

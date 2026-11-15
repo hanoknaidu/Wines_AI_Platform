@@ -81,9 +81,7 @@ async def verify(
     if "grounded" not in data:
         return not structural, structural, "structural"
 
-    unsupported = sorted(
-        {str(r) for r in data.get("unsupported_row_ids") or []} | set(structural)
-    )
+    unsupported = sorted({str(r) for r in data.get("unsupported_row_ids") or []} | set(structural))
     return (bool(data["grounded"]) and not unsupported), unsupported, "model"
 
 

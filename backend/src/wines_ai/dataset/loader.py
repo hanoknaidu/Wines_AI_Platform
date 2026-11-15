@@ -57,9 +57,10 @@ class DatasetIndex:
         return self.by_style.get(style, [])
 
     def index_sizes(self) -> dict[str, int]:
-        return {"by_row_id": len(self.by_row_id), **{
-            f"style:{style}": len(rows) for style, rows in sorted(self.by_style.items())
-        }}
+        return {
+            "by_row_id": len(self.by_row_id),
+            **{f"style:{style}": len(rows) for style, rows in sorted(self.by_style.items())},
+        }
 
 
 class DatasetError(RuntimeError):

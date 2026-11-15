@@ -22,8 +22,15 @@ from .engine import CardEvent
 logger = logging.getLogger("wines_ai.grounding")
 
 # Fields a card may carry that must come from the row verbatim, never from an engine.
-_ROW_OWNED = ("variety", "style", "description", "typical_regions", "example_producers",
-              "review_status", "dataset_version")
+_ROW_OWNED = (
+    "variety",
+    "style",
+    "description",
+    "typical_regions",
+    "example_producers",
+    "review_status",
+    "dataset_version",
+)
 
 
 def check_card(index: DatasetIndex, event: CardEvent, *, turn_id: str) -> CardEvent | None:

@@ -73,9 +73,7 @@ class DeterministicEngine:
             async for event in self._interview(req, profile, ctx):
                 yield event
 
-        yield Usage(
-            intent=ctx["intent"], intent_confidence=confidence, model="deterministic"
-        )
+        yield Usage(intent=ctx["intent"], intent_confidence=confidence, model="deterministic")
 
     # --- 4 - out-of-scope / safety --------------------------------------
     async def _out_of_scope(self, topic: str) -> AsyncIterator[TurnEvent]:
@@ -145,9 +143,7 @@ class DeterministicEngine:
         )
 
     # --- 3 - refine ------------------------------------------------------
-    async def _refine(
-        self, req: TurnRequest, profile: dict, ctx: dict
-    ) -> AsyncIterator[TurnEvent]:
+    async def _refine(self, req: TurnRequest, profile: dict, ctx: dict) -> AsyncIterator[TurnEvent]:
         chip = refine.detect(req.utterance, req.selected_chip_id)
         if chip is None:
             async for event in self._recommend(req, profile, ctx=ctx):
@@ -157,8 +153,7 @@ class DeterministicEngine:
         patch, blocked = refine.apply(profile, chip)
         if blocked:
             async for token in self._stream(
-                f"I cannot go further that way - {blocked}. "
-                "Try one of the other adjustments below."
+                f"I cannot go further that way - {blocked}. Try one of the other adjustments below."
             ):
                 yield token
             yield ChipsEvent(payload={"kind": "refine", "options": refine.chips_payload()})
@@ -167,9 +162,7 @@ class DeterministicEngine:
         profile.update(patch)
         yield ProfilePatch(
             values=patch,
-            confidence={
-                axis: {"confidence": 1.0, "provenance": "refined"} for axis in patch
-            },
+            confidence={axis: {"confidence": 1.0, "provenance": "refined"} for axis in patch},
         )
         yield Checkpoint(node="refine", state={"chip": chip["id"], "patch": patch})
 
@@ -183,9 +176,7 @@ class DeterministicEngine:
         # that defines it is the one-axis delta against what was already on screen, and
         # `transaction_log.intent` feeds the intent eval set. Lane 3 labels the same
         # turn the same way, which is what makes the two engines comparable.
-        async for event in self._recommend(
-            req, profile, anchor=req.previous_row_ids, ctx=None
-        ):
+        async for event in self._recommend(req, profile, anchor=req.previous_row_ids, ctx=None):
             yield event
 
     # --- 2 - recommend ---------------------------------------------------

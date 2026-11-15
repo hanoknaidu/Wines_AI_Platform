@@ -14,8 +14,21 @@ from ..taste import interview, refine
 OUT_OF_SCOPE_TOPICS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("price", ("how much", "price", "cost", "cheap", "expensive", "budget", "$", "£", "under 20")),
     ("availability", ("in stock", "available", "stocked", "carry", "find it at", "near me")),
-    ("health", ("healthy", "health", "calories", "hangover", "sulphite", "sulfite", "good for you",
-                "bad for you", "liver", "pregnan")),
+    (
+        "health",
+        (
+            "healthy",
+            "health",
+            "calories",
+            "hangover",
+            "sulphite",
+            "sulfite",
+            "good for you",
+            "bad for you",
+            "liver",
+            "pregnan",
+        ),
+    ),
     ("purchase", ("buy", "purchase", "order", "ship", "delivery", "add to cart", "checkout")),
     ("vintage", ("vintage", "what year", "which year", "2019", "2020", "2021")),
     # Prompt injection. Lexical and first, because this is the one topic where the
@@ -23,11 +36,26 @@ OUT_OF_SCOPE_TOPICS: tuple[tuple[str, tuple[str, ...]], ...] = (
     # change the instructions must be refused before it is rewritten into a retrieval
     # query, embedded, or packed into a prompt. Matching it here means it never
     # reaches stage A at all - see orchestrator/workflows/safety.py.
-    ("injection", ("ignore previous", "ignore your", "ignore all previous",
-                   "disregard the above", "disregard previous", "disregard your",
-                   "system prompt", "your instructions", "new instructions",
-                   "you are now", "pretend you are", "act as if you",
-                   "reveal your prompt", "repeat your prompt", "jailbreak")),
+    (
+        "injection",
+        (
+            "ignore previous",
+            "ignore your",
+            "ignore all previous",
+            "disregard the above",
+            "disregard previous",
+            "disregard your",
+            "system prompt",
+            "your instructions",
+            "new instructions",
+            "you are now",
+            "pretend you are",
+            "act as if you",
+            "reveal your prompt",
+            "repeat your prompt",
+            "jailbreak",
+        ),
+    ),
 )
 
 

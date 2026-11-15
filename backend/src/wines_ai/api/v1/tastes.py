@@ -57,8 +57,12 @@ def _row(row) -> TasteRow:
 @router.post("", response_model=TasteIngestResponse, status_code=201)
 async def ingest_taste(body: TasteUpload, services: ReadyServicesDep) -> TasteIngestResponse:
     if services.ingestor is None:
-        raise ApiProblem(503, "ingest_disabled", "Ingestion disabled",
-                         "Taste ingestion is turned off on this deployment.")
+        raise ApiProblem(
+            503,
+            "ingest_disabled",
+            "Ingestion disabled",
+            "Taste ingestion is turned off on this deployment.",
+        )
     try:
         result = await services.ingestor.ingest(body.note)
     except IngestRejected as exc:

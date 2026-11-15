@@ -89,6 +89,7 @@ class AnthropicProvider:
         if model.startswith("claude-sonnet"):
             return {"type": "between_tools"}
         return None
+
     def _params(self, req: ModelRequest) -> dict[str, Any]:
         system = [{"type": "text", "text": b.text} for b in req.system if b.text]
         # The cache breakpoint goes after the last cacheable system block. Minimum

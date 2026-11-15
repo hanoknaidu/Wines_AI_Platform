@@ -389,8 +389,14 @@ Write `reasoning` first, one sentence.""",
                     {
                         "type": "string",
                         "enum": [
-                            "less_sweet", "sweeter", "lighter", "bolder",
-                            "smoother", "less_oaky", "more_fruit", "more_earthy",
+                            "less_sweet",
+                            "sweeter",
+                            "lighter",
+                            "bolder",
+                            "smoother",
+                            "less_oaky",
+                            "more_fruit",
+                            "more_earthy",
                         ],
                     },
                     {"type": "null"},
@@ -403,6 +409,7 @@ Write `reasoning` first, one sentence.""",
     max_tokens=1024,
     effort="low",
 )
+
 
 def _taste_profile_schema() -> dict:
     """Every axis is required and enum-constrained: an ingested row must be complete."""
@@ -458,7 +465,14 @@ health claim. `search_query`: a short query to look up where this style is grown
 PROMPTS: dict[str, Prompt] = {
     p.id: p
     for p in (
-        ROUTE, REWRITE, DECOMPOSE, LEAD_IN, CARD_REASON, VERIFY,
-        INTERVIEW_SUGGEST, REFINE_DELTA, TASTE_PROFILE,
+        ROUTE,
+        REWRITE,
+        DECOMPOSE,
+        LEAD_IN,
+        CARD_REASON,
+        VERIFY,
+        INTERVIEW_SUGGEST,
+        REFINE_DELTA,
+        TASTE_PROFILE,
     )
 }

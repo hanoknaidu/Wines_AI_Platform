@@ -71,9 +71,7 @@ def render_row(row: WineRow, *, threshold: float) -> str:
     )
 
 
-def pack(
-    candidates: list[Candidate], *, budget: int, threshold: float
-) -> PackedContext:
+def pack(candidates: list[Candidate], *, budget: int, threshold: float) -> PackedContext:
     out = PackedContext(budget=budget)
     seen: dict[tuple, str] = {}
 

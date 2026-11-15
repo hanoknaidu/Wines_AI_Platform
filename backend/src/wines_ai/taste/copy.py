@@ -35,9 +35,12 @@ _NEAR_MISS = {
 }
 
 _DIRECTION = {
-    ("sweetness", -1): "drier", ("sweetness", 1): "sweeter",
-    ("body", -1): "lighter", ("body", 1): "fuller",
-    ("oak", -1): "crisper", ("oak", 1): "more oaky",
+    ("sweetness", -1): "drier",
+    ("sweetness", 1): "sweeter",
+    ("body", -1): "lighter",
+    ("body", 1): "fuller",
+    ("oak", -1): "crisper",
+    ("oak", 1): "more oaky",
 }
 
 

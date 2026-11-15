@@ -32,9 +32,7 @@ class Recording(OfflineProvider):
         name = (req.schema or {}).get("name", "")
         if name in self.scripted:
             data = self.scripted[name]
-            return ModelResult(
-                model=req.model, text="", structured=data, tokens_in=1, tokens_out=1
-            )
+            return ModelResult(model=req.model, text="", structured=data, tokens_in=1, tokens_out=1)
         return await super().complete(req)
 
     async def stream(self, req):
@@ -48,8 +46,11 @@ class Recording(OfflineProvider):
 
 def _gateway(provider):
     return ModelGateway(
-        provider, timeout_seconds=5.0, max_attempts=1,
-        breaker_threshold=3, breaker_cooldown_seconds=30.0,
+        provider,
+        timeout_seconds=5.0,
+        max_attempts=1,
+        breaker_threshold=3,
+        breaker_cooldown_seconds=30.0,
     )
 
 
@@ -61,7 +62,9 @@ def index(settings):
 def _run(index, settings, provider, **req_kwargs):
     engine = OrchestratedEngine(index, settings, gateway=_gateway(provider))
     req = TurnRequest(
-        turn_id="t", conversation_id="c", dataset_version=index.version,
+        turn_id="t",
+        conversation_id="c",
+        dataset_version=index.version,
         **{"profile": {}, "selected_chip_id": None, **req_kwargs},
     )
 
@@ -81,12 +84,11 @@ def _node(events, name):
 
 # --- pre-retrieval: the guarded rewrite ----------------------------------
 
+
 def _rewrite(provider, **kw):
     args = dict(model="claude-haiku-5-5", profile={}, history=[], previous_row_ids=[])
     args.update(kw)
-    return asyncio.run(
-        pipeline.rewrite(_gateway(provider), TurnLedger(ceiling_usd=1.0), **args)
-    )
+    return asyncio.run(pipeline.rewrite(_gateway(provider), TurnLedger(ceiling_usd=1.0), **args))
 
 
 def test_empty_history_skips_the_rewrite_call_entirely():
@@ -98,12 +100,18 @@ def test_empty_history_skips_the_rewrite_call_entirely():
 
 def test_a_standalone_decision_returns_the_message_verbatim():
     """Even if the model paraphrased in `query`: an independent message is never changed."""
-    provider = Recording({"rewrite": {
-        "reasoning": "new topic", "decision": "standalone",
-        "query": "sparkling wine, festive, dry, light-bodied",
-    }})
+    provider = Recording(
+        {
+            "rewrite": {
+                "reasoning": "new topic",
+                "decision": "standalone",
+                "query": "sparkling wine, festive, dry, light-bodied",
+            }
+        }
+    )
     query, rewritten, source = _rewrite(
-        provider, utterance="actually, a sparkling for a party",
+        provider,
+        utterance="actually, a sparkling for a party",
         history=[{"role": "user", "content": "a bold red"}],
     )
     assert query == "actually, a sparkling for a party"
@@ -111,12 +119,18 @@ def test_a_standalone_decision_returns_the_message_verbatim():
 
 
 def test_a_dependent_message_is_rewritten():
-    provider = Recording({"rewrite": {
-        "reasoning": "resolves 'that'", "decision": "rewritten",
-        "query": "light-bodied red with soft tannins, lighter than a Malbec",
-    }})
+    provider = Recording(
+        {
+            "rewrite": {
+                "reasoning": "resolves 'that'",
+                "decision": "rewritten",
+                "query": "light-bodied red with soft tannins, lighter than a Malbec",
+            }
+        }
+    )
     query, rewritten, _ = _rewrite(
-        provider, utterance="something lighter than that",
+        provider,
+        utterance="something lighter than that",
         history=[{"role": "assistant", "content": "Malbec [r1]"}],
     )
     assert rewritten and "lighter than a Malbec" in query
@@ -143,6 +157,7 @@ def test_the_rewrite_prompt_states_every_guardrail():
 
 # --- retrieval settings ----------------------------------------------------
 
+
 def test_top_k_and_augmentation_sizes(settings):
     assert settings.retriever_k == 25
     assert settings.rerank_top_n == 10
@@ -150,6 +165,7 @@ def test_top_k_and_augmentation_sizes(settings):
 
 
 # --- interview ---------------------------------------------------------------
+
 
 def test_a_typed_taste_gets_suggestions_then_the_next_question(index, settings):
     provider = Recording()
@@ -170,9 +186,7 @@ def test_a_typed_taste_gets_suggestions_then_the_next_question(index, settings):
 
 def test_a_chip_answer_keeps_the_deterministic_path(index, settings):
     provider = Recording()
-    events = _run(
-        index, settings, provider, utterance="Red", selected_chip_id="style:red"
-    )
+    events = _run(index, settings, provider, utterance="Red", selected_chip_id="style:red")
     assert _node(events, "interview_suggest") is None
     assert provider.calls == [], "a chip press costs no model call"
     assert any(isinstance(e, ChipsEvent) for e in events)
@@ -200,7 +214,10 @@ def test_a_simple_recommend_uses_sonnet(index, settings):
 def test_a_pairing_request_escalates_to_opus(index, settings):
     provider = Recording()
     events = _run(
-        index, settings, provider, utterance="a bold red to pair with steak",
+        index,
+        settings,
+        provider,
+        utterance="a bold red to pair with steak",
         profile=dict(_FULL),
     )
     gen = _node(events, "generator")
@@ -209,6 +226,7 @@ def test_a_pairing_request_escalates_to_opus(index, settings):
 
 
 # --- refine: Opus --------------------------------------------------------------
+
 
 def _previous(index):
     return [r.row_id for r in index.rows if r.style == "red"][:3]
@@ -220,14 +238,22 @@ def test_an_unreadable_correction_is_read_by_opus(index):
 
     from wines_ai.orchestrator.workflows.refine import read_delta
 
-    provider = Recording({"refine_delta": {
-        "reasoning": "syrup means too sweet", "adjustment": "less_sweet",
-        "also_requested": [],
-    }})
+    provider = Recording(
+        {
+            "refine_delta": {
+                "reasoning": "syrup means too sweet",
+                "adjustment": "less_sweet",
+                "also_requested": [],
+            }
+        }
+    )
     ctx = SimpleNamespace(
         state=SimpleNamespace(
-            utterance="hmm, those all tasted like syrup", selected_chip_id=None,
-            previous_row_ids=_previous(index), history=[], profile={"style": "red"},
+            utterance="hmm, those all tasted like syrup",
+            selected_chip_id=None,
+            previous_row_ids=_previous(index),
+            history=[],
+            profile={"style": "red"},
         ),
         index=index,
         models={"refine": "claude-opus-5-5"},
@@ -242,8 +268,13 @@ def test_an_unreadable_correction_is_read_by_opus(index):
 def test_a_lexical_correction_needs_no_model_to_read_it(index, settings):
     provider = Recording()
     events = _run(
-        index, settings, provider, utterance="Lighter", selected_chip_id="lighter",
-        profile=dict(_FULL), previous_row_ids=_previous(index),
+        index,
+        settings,
+        provider,
+        utterance="Lighter",
+        selected_chip_id="lighter",
+        profile=dict(_FULL),
+        previous_row_ids=_previous(index),
     )
     assert _node(events, "refine_delta").state == {"chip": "lighter", "source": "lexical"}
     assert provider.models_for("refine_delta") == set()
@@ -251,6 +282,7 @@ def test_a_lexical_correction_needs_no_model_to_read_it(index, settings):
 
 
 # --- Qdrant + cross-encoder --------------------------------------------------
+
 
 @pytest.fixture(scope="module")
 def real_backend():
@@ -281,8 +313,11 @@ def test_the_cross_encoder_reorders_by_relevance(real_backend, index):
     reds = [r for r in index.rows if r.style == "red"]
     candidates = [pipeline.Candidate(row=r) for r in (whites[:4] + reds[:4])]
     top = pipeline.rerank(
-        candidates, query="a bold full-bodied red with grippy tannins",
-        profile={}, top_n=4, cross_encoder=reranker,
+        candidates,
+        query="a bold full-bodied red with grippy tannins",
+        profile={},
+        top_n=4,
+        cross_encoder=reranker,
     )
     assert all("cross_encoder" in c.arm_scores for c in top)
     # Calibrated relevance, not min-max: every score is a probability in [0, 1].
