@@ -15,3 +15,6 @@ frontend/dist/
 __pycache__/
 *.pyc
 .DS_Store
+
+# Runtime store written by POST /api/v1/tastes; local state, not source.
+backend/data/ingested_tastes.jsonl
