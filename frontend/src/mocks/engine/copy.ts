@@ -171,3 +171,8 @@ export function leadIn(count: number, profile: Profile): string {
   const tail = bits.length ? `: ${bits.join(", ")}` : "";
   return `Here are ${count} grape varieties worth looking for${tail}.`;
 }
+
+/** Port of `copy.NOT_UNDERSTOOD`: said before re-asking a question the last answer did
+ *  not settle, so a repeated prompt never reads as the product ignoring the user. */
+export const NOT_UNDERSTOOD =
+  "I could not tell your answer from that. Pick one below, or put it another way. ";

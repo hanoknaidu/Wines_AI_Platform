@@ -14,6 +14,7 @@ import { askedAxesForStyle } from "./axes";
 import * as copy from "./copy";
 import { classify } from "./intent";
 import { isSufficient, nextQuestion, readAny, readChip } from "./interview";
+import { NOT_UNDERSTOOD } from "./copy";
 import * as ranking from "./ranking";
 import * as refine from "./refine";
 import type { DatasetArtifact, EngineEvent, Profile, TurnRequest, WineRow } from "./types";
@@ -27,7 +28,7 @@ export const BUILT_AT = DATASET.built_at;
 /** Mirrors of `config.py`. */
 const MAX_INTERVIEW_QUESTIONS = 3;
 const RESULTS_MIN = 3;
-const RESULTS_MAX = 5;
+const RESULTS_MAX = 3;
 const SWEETNESS_TOLERANCE_LEVELS = 1;
 const MAX_MATCH_DISTANCE = 0.6;
 
@@ -123,7 +124,12 @@ function runInterview(
   }
 
   ctx.intent = "interview";
-  events.push({ t: "token", text: question.prompt });
+  const notUnderstood =
+    !Object.keys(patch).length && !req.selected_chip_id && req.utterance.trim() && askedCount;
+  events.push({
+    t: "token",
+    text: notUnderstood ? NOT_UNDERSTOOD + question.prompt : question.prompt,
+  });
   events.push({
     t: "chips",
     chips: {

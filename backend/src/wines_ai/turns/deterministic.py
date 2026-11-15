@@ -130,7 +130,10 @@ class DeterministicEngine:
 
         ctx["intent"] = "interview"
         yield Checkpoint(node="interview_ask", state={"axis": question.axis})
-        async for token in self._stream(question.prompt):
+        prompt = question.prompt
+        if not patch and not req.selected_chip_id and req.utterance.strip() and asked_count:
+            prompt = copytext.NOT_UNDERSTOOD + prompt
+        async for token in self._stream(prompt):
             yield token
         yield ChipsEvent(
             payload={
