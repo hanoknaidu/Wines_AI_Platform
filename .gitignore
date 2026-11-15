@@ -20,5 +20,3 @@ __pycache__/
 # Runtime store written by POST /api/v1/tastes; local state, not source.
 backend/data/ingested_tastes.jsonl
 
-# User-uploaded tasting notes (taste ingestion store)
-Wines AI Platform/backend/data/
