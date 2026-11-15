@@ -28,6 +28,7 @@ from __future__ import annotations
 from ...taste.axes import AXES_BY_ID, level_index
 from ..retrieval.bm25 import tokenize
 from ..retrieval.index import document_text
+from ..retrieval.vector_store import sigmoid
 from .types import Candidate
 
 # Weights. Term overlap dominates because it is the only signal that reads the actual
@@ -69,9 +70,59 @@ def _axis_agreement(row, profile: dict) -> float:
 
 
 def rerank(
-    candidates: list[Candidate], *, query: str, profile: dict, top_n: int
+    candidates: list[Candidate],
+    *,
+    query: str,
+    profile: dict,
+    top_n: int,
+    cross_encoder=None,
+    ce_weight: float = 0.6,
+    min_relevance: float = 0.0,
 ) -> list[Candidate]:
-    """Stage G. Scores each (query, candidate) pair jointly; returns the top n."""
+    """Stage G. Scores each (query, candidate) pair jointly; returns the top n.
+
+    With a cross-encoder loaded, the score is
+        ce_weight * minmax(logit) + (1 - ce_weight) * axis_agreement
+    The cross-encoder plays two roles, each on the scale suited to it:
+
+    * ORDERING uses the raw logit, min-max normalised over the candidate set. The
+      calibrated probability is too compressed for this - a clearly relevant row
+      scores ~0.07 - so blending it directly would hand the ranking to the axis term.
+    * The FLOOR uses the calibrated relevance, sigmoid(logit). Rows below
+      `min_relevance` are dropped, because that judgement is absolute: min-max would
+      give the best row of an irrelevant pool a 1.0. The floor never empties the list;
+      abstaining is the gate's decision downstream, not this stage's.
+
+    The axis term stays because a cross-encoder judges text relevance and
+    cannot know that "sweetness=dry" contradicts a request for something sweet; the
+    labelled axes can. Without one, the feature scorer below is used unchanged.
+    """
+    if cross_encoder is not None and candidates:
+        docs = [document_text(c.row) for c in candidates]
+        try:
+            if hasattr(cross_encoder, "score_logits"):
+                logits = cross_encoder.score_logits(query, docs)
+                relevance = [sigmoid(x) for x in logits]
+            else:  # a scorer with no logits: its score orders and floors alike
+                logits = cross_encoder.score(query, docs)
+                relevance = [min(1.0, max(0.0, x)) for x in logits]
+        except Exception:  # an ONNX runtime failure must not fail the turn
+            logits = None
+        if logits is not None:
+            lo, hi = min(logits), max(logits)
+            span = (hi - lo) or 1.0
+            for candidate, logit, rel in zip(candidates, logits, relevance, strict=True):
+                candidate.arm_scores["cross_encoder"] = round(rel, 6)
+                candidate.arm_scores["cross_encoder_logit"] = round(logit, 6)
+                candidate.rerank = round(
+                    ce_weight * ((logit - lo) / span)
+                    + (1.0 - ce_weight) * _axis_agreement(candidate.row, profile),
+                    6,
+                )
+            ordered = sorted(candidates, key=lambda c: (-c.rerank, c.row_id))
+            kept = [c for c in ordered if c.arm_scores["cross_encoder"] >= min_relevance]
+            return (kept or ordered)[:top_n]
+
     query_terms = set(tokenize(query))
     named_variety = {t for t in query_terms if len(t) > 3}
 

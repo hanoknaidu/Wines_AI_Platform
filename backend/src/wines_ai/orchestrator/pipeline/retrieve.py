@@ -85,8 +85,9 @@ async def retrieve(
 
     def dense() -> list[tuple[str, float]]:
         # HyDE text, not the question: note-to-note beats question-to-note.
-        hits = indexes.dense(hyde_text or plan_.query, k=plan_.k_dense * 2)
-        return [pair for pair in hits if pair[0] in allowed][: plan_.k_dense]
+        # The allow-list is pushed into the query (a Qdrant payload filter), so top-K
+        # is K eligible rows.
+        return indexes.dense(hyde_text or plan_.query, k=plan_.k_dense, allowed=allowed)
 
     def sparse() -> list[tuple[str, float]]:
         hits = indexes.sparse(plan_.query, k=plan_.k_sparse * 2)

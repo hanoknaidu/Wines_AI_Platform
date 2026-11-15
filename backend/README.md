@@ -16,17 +16,17 @@ each citing the dataset row it came from. Every turn costs **$0.00**.
 cd backend
 uv venv --python 3.12 && uv pip install -e ".[dev]"
 mkdir -p var && uv run alembic upgrade head      # or let the app create the schema
-uv run python -m wines_ai                        # http://127.0.0.1:8000
+uv run python -m wines_ai                        # http://127.0.0.1:8010
 ```
 
-Then: `http://127.0.0.1:8000/docs` for the OpenAPI 3.1 surface.
+Then: `http://127.0.0.1:8010/docs` for the OpenAPI 3.1 surface.
 
 ```bash
-curl -s localhost:8000/api/v1/readyz | jq        # dataset loaded?
-curl -s -c j -X POST localhost:8000/api/v1/age-gate -d '{"confirmed":true}' -H 'content-type: application/json'
-CID=$(curl -s -b j -c j -X POST localhost:8000/api/v1/conversations -d '{}' -H 'content-type: application/json' | jq -r .id)
-curl -sN -b j "localhost:8000/api/v1/conversations/$CID/stream?after=0" &
-curl -s -b j -X POST "localhost:8000/api/v1/conversations/$CID/messages" \
+curl -s localhost:8010/api/v1/readyz | jq        # dataset loaded?
+curl -s -c j -X POST localhost:8010/api/v1/age-gate -d '{"confirmed":true}' -H 'content-type: application/json'
+CID=$(curl -s -b j -c j -X POST localhost:8010/api/v1/conversations -d '{}' -H 'content-type: application/json' | jq -r .id)
+curl -sN -b j "localhost:8010/api/v1/conversations/$CID/stream?after=0" &
+curl -s -b j -X POST "localhost:8010/api/v1/conversations/$CID/messages" \
   -H 'content-type: application/json' -H "Idempotency-Key: $(uuidgen)" \
   -d '{"content":"a bold red, nothing too sweet"}'
 ```
@@ -134,7 +134,7 @@ wrong.
 
 ## Notes for the frontend
 
-1. **Dev proxy** `/api` → `http://127.0.0.1:8000`. Avoids CORS entirely in dev.
+1. **Dev proxy** `/api` → `http://127.0.0.1:8010`. Avoids CORS entirely in dev.
 2. **Cookies are load-bearing.** Session and age-gate cookies are httpOnly and signed,
    so `fetch` needs `credentials: "include"` **and** `EventSource` needs
    `{ withCredentials: true }`. With credentials on, the server cannot send

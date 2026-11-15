@@ -15,7 +15,7 @@ FR-13's abstention all actually work rather than replaying a canned transcript.
 
 ```bash
 npm install
-npm run dev            # http://localhost:5173
+npm run dev            # http://localhost:5180
 ```
 
 Then: `/` to start a conversation, `/dev/styleguide` for every token, component and
@@ -48,11 +48,11 @@ reason.
 ### Point it at the real backend
 
 ```bash
-cd ../backend && uv run python -m wines_ai     # http://127.0.0.1:8000
+cd ../backend && uv run python -m wines_ai     # http://127.0.0.1:8010
 VITE_USE_MOCKS=false npm run dev
 ```
 
-If 8000 is taken (the backend's `__main__` hardcodes it), run uvicorn on another port
+If 8010 is taken (the backend's `__main__` hardcodes it), run uvicorn on another port
 and point the proxy at it:
 
 ```bash
@@ -68,7 +68,7 @@ cd ../backend && WA_DATASET_PATH="$PWD/src/wines_ai/dataset/seed/wines.demo.json
   .venv/bin/python -m uvicorn wines_ai.main:app --port 8001
 ```
 
-Vite proxies `/api` → `127.0.0.1:8000`, so there is no CORS in dev and no base URL to
+Vite proxies `/api` → `127.0.0.1:8010`, so there is no CORS in dev and no base URL to
 switch in the client. `fetch` already sends `credentials: "include"` and `EventSource`
 is already constructed with `withCredentials: true`, because the session and age-gate
 cookies are httpOnly and the mocks were built to need the same thing.
@@ -167,3 +167,16 @@ dataset version, and an archived conversation.
 - The responsive layout, a real screen-reader pass and Lighthouse have not been run in
   a browser. Breakpoints, focus management and the live region are built; they are
   unverified against an actual screen.
+
+## End-to-end tests (Playwright, real backend + LLM)
+
+```bash
+cd ../backend && WA_TURN_CACHE_ENABLED=false uv run python -m wines_ai   # :8010
+VITE_USE_MOCKS=false npx vite --port 5181                              # real-backend UI
+npm run e2e                                                            # e2e/*.spec.ts
+```
+
+Output goes to `$TMPDIR/wines-ai-e2e` (override with `E2E_OUT`). It must stay outside
+`frontend/`: Vite watches this folder and reloads the page whenever a trace is written.
+Card citations are checked against `backend/.../wines.seed.json` plus
+`backend/data/ingested_tastes.jsonl`. Each run spends a few cents on the live provider.

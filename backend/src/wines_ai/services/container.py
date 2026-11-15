@@ -9,6 +9,7 @@ from ..config import Settings
 from ..dataset.loader import DatasetError, DatasetIndex, load
 from ..db.database import Database
 from ..errors import engine_unavailable
+from ..ingest import IngestStore, TasteIngestor, build_web_searcher
 from ..observability import log
 from ..orchestrator.gateway import ModelGateway, build_gateway, provider_unavailable_reason
 from ..orchestrator.retrieval import RetrievalIndexes
@@ -44,6 +45,8 @@ class Services:
     # Set when the requested model provider could not be built. Advisory unless
     # `require_llm_provider` is on, in which case it fails readiness.
     provider_error: str | None = None
+    # POST /tastes. None when ingestion is disabled or the dataset failed to load.
+    ingestor: TasteIngestor | None = None
 
     def engine_for(self, name: str):
         if self.index is None:
@@ -130,7 +133,9 @@ def build(settings: Settings, db: Database) -> Services:
         # this size and make `WA_ENGINE=orchestrated` a restart rather than a rebuild;
         # the gateway with the default `offline` provider opens no socket and reads no
         # key, so neither of these breaks the empty-environment boot.
-        services.indexes = build_retrieval_indexes(index, dim=settings.embedding_dim)
+        services.indexes = build_retrieval_indexes(
+            index, dim=settings.embedding_dim, settings=settings
+        )
         services.provider_error = provider_unavailable_reason(settings)
         if services.provider_error:
             log(
@@ -142,6 +147,16 @@ def build(settings: Settings, db: Database) -> Services:
                 strict=settings.require_llm_provider,
             )
         services.gateway = build_gateway(settings)
+        if settings.ingest_enabled:
+            services.ingestor = TasteIngestor(
+                index=index,
+                indexes=services.indexes,
+                gateway=services.gateway,
+                searcher=build_web_searcher(settings),
+                store=IngestStore(settings.resolved_ingest_store_path),
+                settings=settings,
+            )
+            services.ingestor.replay()
         services.runner = TurnRunner(
             engine_factory=services.engine_for,
             db=db,

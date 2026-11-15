@@ -52,7 +52,11 @@ logger = logging.getLogger("wines_ai.workflows.ask")
 
 
 async def run(
-    ctx: Context, *, anchor_row_ids: list[str] | None = None, label: str = "recommend"
+    ctx: Context,
+    *,
+    anchor_row_ids: list[str] | None = None,
+    label: str = "recommend",
+    generator_model: str | None = None,
 ):
     """Yields TurnEvents. `anchor_row_ids` and `label` are set by the refine workflow.
 
@@ -172,7 +176,13 @@ async def run(
 
     # --- G: score the pair jointly ---------------------------------------
     reranked = pipeline.rerank(
-        fused, query=state.query, profile=working_profile, top_n=settings.rerank_top_n
+        fused,
+        query=state.query,
+        profile=working_profile,
+        top_n=settings.rerank_top_n,
+        cross_encoder=ctx.indexes.cross_encoder,
+        ce_weight=settings.cross_encoder_weight,
+        min_relevance=settings.rerank_min_relevance,
     )
     state.nodes_run.append("rerank")
     yield RetrievalTrace(
@@ -241,10 +251,18 @@ async def run(
     }
 
     # --- J: generate ------------------------------------------------------
+    # The refine workflow pins its own model; a recommend turn picks by complexity.
+    if generator_model is None:
+        generator_model, why = choose_generator(ctx, chosen, working_profile)
+    else:
+        why = "pinned_by_workflow"
+    state.generator_model = generator_model
+    yield Checkpoint(node="generator", state={"model": generator_model, "reason": why})
     threshold = settings.confidence_threshold
     lead_fallback = _lead_in_fallback(len(chosen), working_profile)
     async for token in _stream_prose(
         ctx,
+        model=generator_model,
         prompt=LEAD_IN,
         payload={
             "kind": "lead_in",
@@ -273,7 +291,7 @@ async def run(
     ]
     requests = [
         CARD_REASON.build(
-            ctx.models["generator"],
+            generator_model,
             {
                 "kind": "card_reason",
                 "row": pipeline.render_row(c.row, threshold=threshold),
@@ -360,6 +378,38 @@ async def run(
     yield ChipsEvent(payload={"kind": "refine", "options": refine_mod.chips_payload()})
 
 
+# --- generator choice ----------------------------------------------------
+# Words that mark a request needing more than a match: a comparison or a pairing has
+# to reason across rows or beyond the axes, which is where Opus earns its 2x price.
+_COMPLEX_CUES = (
+    " vs ", " versus ", "compare", "compared", "difference between", "better than",
+    "pair with", "pairs with", "pairing", "go with", "goes with", "with steak",
+    "with fish", "with dinner", "with dessert", "with cheese", "for a dinner",
+)
+
+
+def choose_generator(ctx: Context, chosen, profile: dict) -> tuple[str, str]:
+    """Sonnet by default; Opus when the turn is complex. -> (model, reason).
+
+    A rule rather than a model call: asking a model whether to use a bigger model costs
+    a round trip on every turn to save money on a few. Three triggers, each logged:
+      * the turn decomposed into two or more sub-requests;
+      * it asks for a comparison or a food pairing;
+      * a chosen row misses the stated sweetness - a near-miss the copy has to hedge
+        honestly, which is the prose most likely to go wrong.
+    """
+    state = ctx.state
+    if len(state.sub_queries) >= 2:
+        return ctx.models["recommend_complex"], "multi_part"
+    lowered = f" {state.utterance.lower()} "
+    if any(cue in lowered for cue in _COMPLEX_CUES):
+        return ctx.models["recommend_complex"], "comparison_or_pairing"
+    target = profile.get("sweetness")
+    if target and any(c.row.sweetness != target for c in chosen):
+        return ctx.models["recommend_complex"], "near_miss"
+    return ctx.models["recommend"], "simple"
+
+
 # --- the abstention gate -------------------------------------------------
 def _gate(
     candidates: list[pipeline.Candidate], profile: dict, settings
@@ -385,10 +435,26 @@ def _gate(
             a = level_index("sweetness", candidate.row.sweetness)
             if a is None or abs(a - t) > settings.sweetness_tolerance_levels:
                 continue
+        if _third_axis_too_far(candidate.row, profile, settings.third_axis_tolerance_levels):
+            continue
         if distance > settings.max_match_distance:
             continue
         keep.append(candidate)
     return keep, best
+
+
+def _third_axis_too_far(row, profile: dict, tolerance: int) -> bool:
+    """True when a STATED body/oak is further than `tolerance` levels from the row's.
+    Unstated axes and unlabelled rows pass: the gate only enforces what was asked."""
+    for axis in ("body", "oak"):
+        target = profile.get(axis)
+        if not target:
+            continue
+        t = level_index(axis, target)
+        a = level_index(axis, getattr(row, axis, None))
+        if t is not None and a is not None and abs(a - t) > tolerance:
+            return True
+    return False
 
 
 async def _empty_state(ctx: Context, profile: dict, *, reason: str, best_distance=None):
@@ -416,14 +482,16 @@ def _tokens(text: str) -> list[Token]:
     return [Token(text=w if i == len(words) - 1 else w + " ") for i, w in enumerate(words)]
 
 
-async def _stream_prose(ctx: Context, *, prompt, payload: dict, fallback: str):
+async def _stream_prose(
+    ctx: Context, *, prompt, payload: dict, fallback: str, model: str | None = None
+):
     """Stream one prose run, falling back to templated copy on any model failure.
 
     The fallback is emitted only if NOTHING was streamed. Once a partial sentence has
     reached the client, replacing it would mean retracting text the user has already
     read - so a truncated lead-in stays truncated and the cards still arrive.
     """
-    req = prompt.build(ctx.models["generator"], payload)
+    req = prompt.build(model or ctx.models["generator"], payload)
     produced = False
     try:
         async for item in ctx.gateway.stream(req, ctx.ledger):
