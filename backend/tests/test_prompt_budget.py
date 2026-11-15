@@ -11,14 +11,18 @@ from wines_ai.pricing import cost_usd
 
 MAX_CARDS = 5
 ROW = {
-    "variety": "Pinot Noir", "style": "red", "sweetness": "dry", "body": "light",
+    "variety": "Pinot Noir",
+    "style": "red",
+    "sweetness": "dry",
+    "body": "light",
     "description": "Red cherry and rose, delicate and silky, with very little grip.",
 }
 
 
 def _worst(prompt, model):
-    req = prompt.build(model, {"kind": prompt.id, "row": ROW, "utterance": "a light red",
-                               "fallback": "x" * 200})
+    req = prompt.build(
+        model, {"kind": prompt.id, "row": ROW, "utterance": "a light red", "fallback": "x" * 200}
+    )
     return cost_usd(model, tokens_in=req.prompt_tokens(), tokens_out=req.max_tokens)
 
 

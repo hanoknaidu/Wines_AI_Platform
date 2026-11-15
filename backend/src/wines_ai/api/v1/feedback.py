@@ -24,9 +24,7 @@ async def vote(
         if message is None:
             raise ApiProblem(404, "message_not_found", "Message not found", f"No message {mid}.")
         # Scope check: a message in someone else's conversation does not exist here.
-        conversation = await conv_repo.get(
-            conn, user_id=user_id, cid=message["conversation_id"]
-        )
+        conversation = await conv_repo.get(conn, user_id=user_id, cid=message["conversation_id"])
         if conversation is None:
             raise ApiProblem(404, "message_not_found", "Message not found", f"No message {mid}.")
         cited = await messages_repo.message_row_ids(conn, message_id=mid)

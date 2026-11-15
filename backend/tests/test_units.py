@@ -13,15 +13,25 @@ from wines_ai.taste.axes import AXES, REFINE_BY_ID, label_for
 
 def row(**over) -> WineRow:
     base = dict(
-        row_id="w-1", variety="Test", style="red", sweetness="dry", body="medium",
-        oak="none", tannin="smooth", acidity="fresh", fruit_savoury="balanced",
-        confidence={}, description="d", dataset_version="v1",
+        row_id="w-1",
+        variety="Test",
+        style="red",
+        sweetness="dry",
+        body="medium",
+        oak="none",
+        tannin="smooth",
+        acidity="fresh",
+        fruit_savoury="balanced",
+        confidence={},
+        description="d",
+        dataset_version="v1",
     )
     base.update(over)
     return WineRow(**base)
 
 
 # --- dataset validator ---------------------------------------------------
+
 
 def test_validator_rejects_unknown_level():
     with pytest.raises(ValueError, match="sweetness"):
@@ -68,9 +78,18 @@ def test_validator_rejects_signed_fixture():
 def test_validator_rejects_extra_field():
     with pytest.raises(ValueError):
         WineRow(
-            row_id="w-1", variety="T", style="red", sweetness="dry", body="medium",
-            oak="none", tannin="smooth", acidity="fresh", fruit_savoury="balanced",
-            description="d", dataset_version="v1", price=12.0,
+            row_id="w-1",
+            variety="T",
+            style="red",
+            sweetness="dry",
+            body="medium",
+            oak="none",
+            tannin="smooth",
+            acidity="fresh",
+            fruit_savoury="balanced",
+            description="d",
+            dataset_version="v1",
+            price=12.0,
         )
 
 
@@ -98,6 +117,7 @@ def test_loader_rejects_bad_row(tmp_path):
 
 # --- the shipped seed artifact -------------------------------------------
 
+
 def test_seed_artifact_is_honest(settings):
     """The seed is a stand-in for band 4's output and must not pretend otherwise."""
     index = load(settings.resolved_dataset_path)
@@ -111,6 +131,7 @@ def test_seed_artifact_is_honest(settings):
 
 
 # --- generated copy ------------------------------------------------------
+
 
 def test_lead_in_never_doubles_a_word(settings):
     """Regression: the sentence ends in "for" and the tail used to start with another
@@ -155,6 +176,7 @@ def test_lead_in_separates_labels_that_contain_and(settings):
 
 # --- the demo artifact ---------------------------------------------------
 
+
 def test_demo_artifact_carries_producers_and_claims_no_review():
     """The demo exists so a card looks full. It must not buy that by claiming review."""
     from wines_ai.dataset.build_demo import OUT as DEMO_ARTIFACT
@@ -189,6 +211,7 @@ def test_demo_artifact_differs_from_the_seed_only_in_the_three_declared_fields(s
 
 
 # --- ranking -------------------------------------------------------------
+
 
 def test_hard_filter_is_style_only():
     rows = [row(row_id="a", style="red"), row(row_id="b", style="white")]
@@ -240,6 +263,7 @@ def test_one_step_sweetness_miss_is_within_floor(settings):
 
 # --- diversify -----------------------------------------------------------
 
+
 def test_diversify_prefers_distinct_varieties():
     rows = [
         row(row_id="a", variety="Cabernet Sauvignon"),
@@ -269,6 +293,7 @@ def test_variety_key_collapses_parenthetical_styles():
 
 
 # --- interview -----------------------------------------------------------
+
 
 def test_style_is_asked_first():
     q = interview.next_question({}, 0, 3)
@@ -317,6 +342,7 @@ def test_read_chip_rejects_unknown_level():
 
 # --- refine --------------------------------------------------------------
 
+
 def test_refine_moves_one_axis_one_step():
     profile = {"style": "red", "sweetness": "sweet"}
     patch, blocked = refine.apply(profile, REFINE_BY_ID["less_sweet"])
@@ -346,6 +372,7 @@ def test_refine_detects_free_text():
 
 # --- vocabulary ----------------------------------------------------------
 
+
 def test_no_user_facing_label_says_dry():
     """'dry' is the most misused word in consumer wine language (BRD section 3)."""
     for axis in AXES:
@@ -360,6 +387,7 @@ def test_hedged_label_below_threshold():
 
 
 # --- pricing -------------------------------------------------------------
+
 
 def test_haiku_tier_break_is_priced():
     """Above 100K input tokens Haiku's input rate is 5x - the trap worth guarding."""

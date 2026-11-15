@@ -68,8 +68,16 @@ _STYLE_WORDS = {
 
 _SWEET_WORDS = {
     "dry": ["not sweet", "no sweetness", "nothing sweet", "unsweet", "bone dry", "dry"],
-    "off_dry": ["hint of sweet", "a bit sweet", "slightly sweet", "touch of sweet", "off dry",
-                "little sweet", "lightly sweet", "semi sweet"],
+    "off_dry": [
+        "hint of sweet",
+        "a bit sweet",
+        "slightly sweet",
+        "touch of sweet",
+        "off dry",
+        "little sweet",
+        "lightly sweet",
+        "semi sweet",
+    ],
     "sweet": ["properly sweet", "very sweet", "really sweet", "sweet", "sugary", "dessert sweet"],
 }
 
@@ -102,8 +110,14 @@ _NEGATION_WINDOW = 28
 
 # These win over a negation cue: "just a hint of sweetness" is not a refusal.
 _EXPLICIT_OFF_DRY = (
-    "hint of sweet", "touch of sweet", "slightly sweet", "a bit sweet",
-    "little sweet", "lightly sweet", "semi sweet", "off dry",
+    "hint of sweet",
+    "touch of sweet",
+    "slightly sweet",
+    "a bit sweet",
+    "little sweet",
+    "lightly sweet",
+    "semi sweet",
+    "off dry",
 )
 
 
@@ -167,6 +181,4 @@ def read_any(text: str) -> dict[str, str]:
 
 
 def style_options() -> list[dict]:
-    return [
-        {"id": f"style:{s}", "label": STYLE_LABELS[s], "value": s} for s in STYLES
-    ]
+    return [{"id": f"style:{s}", "label": STYLE_LABELS[s], "value": s} for s in STYLES]

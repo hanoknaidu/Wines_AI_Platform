@@ -26,9 +26,7 @@ def decode_cursor(cursor: str) -> tuple[str, str] | None:
         return None
 
 
-async def create(
-    conn: AsyncConnection, *, user_id: str, title: str, dataset_version: str
-) -> dict:
+async def create(conn: AsyncConnection, *, user_id: str, title: str, dataset_version: str) -> dict:
     now = utcnow()
     row = {
         "id": new_id("c"),

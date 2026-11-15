@@ -181,18 +181,14 @@ async def patch_conversation(
 ) -> ConversationSummary:
     title = _checked_title(body.title, services.settings.title_max_chars)
     async with services.db.begin() as conn:
-        row = await repo.patch(
-            conn, user_id=user_id, cid=cid, title=title, archived=body.archived
-        )
+        row = await repo.patch(conn, user_id=user_id, cid=cid, title=title, archived=body.archived)
     if row is None:
         raise conversation_not_found(cid)
     return _summary(row)
 
 
 @router.delete("/{cid}", status_code=204)
-async def delete_conversation(
-    cid: str, services: ReadyServicesDep, user_id: UserDep
-) -> Response:
+async def delete_conversation(cid: str, services: ReadyServicesDep, user_id: UserDep) -> Response:
     async with services.db.begin() as conn:
         deleted = await repo.soft_delete(conn, user_id=user_id, cid=cid)
     if not deleted:

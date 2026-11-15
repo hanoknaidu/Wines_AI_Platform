@@ -96,7 +96,10 @@ async def test_rows_survive_restart_via_store(ingestor, settings):
     fresh = TasteIngestor(
         index=index,
         indexes=build(index, dim=settings.embedding_dim, settings=settings),
-        gateway=None, searcher=None, store=ingestor.store, settings=settings,
+        gateway=None,
+        searcher=None,
+        store=ingestor.store,
+        settings=settings,
     )
     assert fresh.replay() == 1
     assert fresh.index.resolve(result.row.row_id) is not None
@@ -134,8 +137,12 @@ async def test_known_and_unknown_on_qdrant_and_cross_encoder(settings, tmp_path,
     except Exception as exc:  # model download unavailable offline
         pytest.skip(f"retrieval models unavailable: {exc!r}")
     ing = TasteIngestor(
-        index=index, indexes=indexes, gateway=None, searcher=FakeSearcher(),
-        store=IngestStore(tmp_path / "q.jsonl"), settings=settings,
+        index=index,
+        indexes=indexes,
+        gateway=None,
+        searcher=FakeSearcher(),
+        store=IngestStore(tmp_path / "q.jsonl"),
+        settings=settings,
     )
 
     known = await ing.ingest("A big Malbec, plummy and dark with soft velvety tannins")

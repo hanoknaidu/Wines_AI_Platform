@@ -43,6 +43,7 @@ def indexes(index, settings):
 
 # --- the prompt registry: cache order is a cost control -----------------
 
+
 def test_a_volatile_block_before_a_cacheable_one_is_refused():
     """The cache keys on a byte-exact prefix, so this ordering is not a style choice.
 
@@ -80,6 +81,7 @@ def test_the_cacheable_prefix_is_identical_across_turns():
 
 
 # --- the gateway ---------------------------------------------------------
+
 
 class _Flaky:
     name = "flaky"
@@ -174,9 +176,7 @@ def test_a_runaway_generator_is_stopped_mid_stream():
             # Its own small request, not a registry prompt: what is under test is the
             # mid-stream cut, and borrowing ROUTE tied it to that prompt's size - v2's
             # longer guide prices above this ceiling before a token streams.
-            req = ModelRequest(
-                model="claude-sonnet-5-5", user=[Block(text="x")], max_tokens=512
-            )
+            req = ModelRequest(model="claude-sonnet-5-5", user=[Block(text="x")], max_tokens=512)
             async for item in gateway.stream(req, ledger):
                 produced.append(item)
         return produced
@@ -210,6 +210,7 @@ def test_the_offline_router_agrees_with_the_keyword_lane():
 
 # --- stage C: the translation layer -------------------------------------
 
+
 @pytest.mark.parametrize(
     "phrase,axis,value",
     [
@@ -231,6 +232,7 @@ def test_hyde_embeds_a_tasting_note_not_a_question():
 
 
 # --- the retrieval arms --------------------------------------------------
+
 
 def test_the_sparse_arm_finds_an_exact_varietal(indexes, index):
     hits = indexes.sparse("Malbec", k=5)
@@ -255,12 +257,11 @@ def test_negation_is_not_the_same_vector_as_assertion():
 def test_the_structured_arm_is_a_recall_floor(index, indexes, settings):
     """Even when both text sides miss, the axis scan returns something to rank."""
     plan = pipeline.plan(
-        query="qwertyuiop zxcvbnm", profile={"style": "red", "sweetness": "dry"},
+        query="qwertyuiop zxcvbnm",
+        profile={"style": "red", "sweetness": "dry"},
         settings=settings,
     )
-    arms = asyncio.run(
-        pipeline.retrieve(index=index, indexes=indexes, plan_=plan, hyde_text="")
-    )
+    arms = asyncio.run(pipeline.retrieve(index=index, indexes=indexes, plan_=plan, hyde_text=""))
     assert arms["structured"], "the floor must hold when the text arms return nothing"
 
 
@@ -278,6 +279,7 @@ def test_the_hard_filter_runs_inside_the_arms(index, indexes, settings):
 
 
 # --- stage F: fusion -----------------------------------------------------
+
 
 def test_rrf_is_rank_based_not_score_based(index):
     """The arms' score scales are incomparable, so only the ranks may be fused."""
@@ -307,13 +309,12 @@ def test_fusion_dedupes_by_row_id(index):
 
 # --- stages G and H -----------------------------------------------------
 
+
 def test_the_reranker_lifts_a_named_varietal(index):
     rows = [r for r in index.rows if r.style == "red"][:6]
     candidates = [Candidate(row=r, fused=0.01) for r in rows]
     target = rows[-1]
-    ranked = rerank(
-        candidates, query=f"{target.variety} please", profile={"style": "red"}, top_n=6
-    )
+    ranked = rerank(candidates, query=f"{target.variety} please", profile={"style": "red"}, top_n=6)
     assert ranked[0].row_id == target.row_id
 
 
@@ -342,6 +343,7 @@ def test_mmr_backfills_rather_than_returning_too_few(index):
 
 # --- stage I: packing ----------------------------------------------------
 
+
 def test_packing_enforces_the_budget_by_dropping_whole_rows(index):
     candidates = [Candidate(row=r) for r in index.rows[:10]]
     packed = pipeline.pack(candidates, budget=120, threshold=0.75)
@@ -366,8 +368,15 @@ def test_packing_collapses_near_duplicates(index, settings):
 def test_the_packed_row_carries_exactly_the_contracted_fields(index):
     text = pipeline.render_row(index.rows[0], threshold=0.75)
     for field in (
-        "row_id", "variety", "style", "axes", "description",
-        "typical_regions", "example_producers", "review_status", "dataset_version",
+        "row_id",
+        "variety",
+        "style",
+        "axes",
+        "description",
+        "typical_regions",
+        "example_producers",
+        "review_status",
+        "dataset_version",
     ):
         assert f"{field}:" in text
     # Confidence reaches the model as a word, not a number to quote at a user.
@@ -375,6 +384,7 @@ def test_the_packed_row_carries_exactly_the_contracted_fields(index):
 
 
 # --- stage K: verification and the eval tap -----------------------------
+
 
 def test_an_unpacked_row_id_is_unsupported_by_construction(index, settings):
     packed = pipeline.pack(
@@ -422,6 +432,7 @@ def test_unmeasured_retrieval_metrics_are_none_not_one():
 
 
 # --- regressions found by reading a real response ------------------------
+
 
 def test_a_prose_call_is_not_answered_with_json():
     """`why_it_matches` arrived as the literal text `{}` on every card.
@@ -495,6 +506,7 @@ def test_the_cap_relaxes_only_to_reach_the_minimum(index):
 
 # --- accounting, as corrected by live responses -------------------------
 
+
 def test_an_unrated_cache_read_is_billed_as_input_not_free():
     """Found by reading a live response, not by a test.
 
@@ -537,8 +549,12 @@ def test_the_ledger_totals_every_token_class():
 
         async def complete(self, req):
             return ModelResult(
-                model=req.model, text="ok", tokens_in=59,
-                tokens_out=63, cache_read_tokens=1580, cache_write_tokens=800,
+                model=req.model,
+                text="ok",
+                tokens_in=59,
+                tokens_out=63,
+                cache_read_tokens=1580,
+                cache_write_tokens=800,
             )
 
         async def stream(self, req):  # pragma: no cover - unused
@@ -617,8 +633,14 @@ def test_the_card_fan_out_is_bounded_as_a_group():
         return Context(
             req=req,
             state=GraphState(
-                turn_id="t", conversation_id="c", utterance="x", selected_chip_id=None,
-                profile={}, history=[], previous_row_ids=[], dataset_version="v",
+                turn_id="t",
+                conversation_id="c",
+                utterance="x",
+                selected_chip_id=None,
+                profile={},
+                history=[],
+                previous_row_ids=[],
+                dataset_version="v",
             ),
             settings=None,
             index=None,
@@ -661,8 +683,13 @@ def test_rerank_orders_by_logit_and_floors_by_calibrated_relevance(index):
     # sigmoid: 2.0 -> 0.88, -2.0 -> 0.12, -8.0 -> 0.0003 (below a 0.005 floor)
     cands = _candidates(index, 3)
     out = rerank(
-        cands, query="q", profile={}, top_n=10,
-        cross_encoder=_LogitScorer([-2.0, 2.0, -8.0]), ce_weight=1.0, min_relevance=0.005,
+        cands,
+        query="q",
+        profile={},
+        top_n=10,
+        cross_encoder=_LogitScorer([-2.0, 2.0, -8.0]),
+        ce_weight=1.0,
+        min_relevance=0.005,
     )
     assert [c.row_id for c in out] == [cands[1].row_id, cands[0].row_id]
     assert out[0].rerank == 1.0  # min-max over logits keeps the ordering's full range
@@ -673,7 +700,11 @@ def test_rerank_orders_by_logit_and_floors_by_calibrated_relevance(index):
 def test_the_relevance_floor_never_empties_the_list(index):
     cands = _candidates(index, 3)
     out = rerank(
-        cands, query="q", profile={}, top_n=10,
-        cross_encoder=_LogitScorer([-9.0, -10.0, -11.0]), min_relevance=0.5,
+        cands,
+        query="q",
+        profile={},
+        top_n=10,
+        cross_encoder=_LogitScorer([-9.0, -10.0, -11.0]),
+        min_relevance=0.5,
     )
     assert len(out) == 3  # abstaining is the gate's call, not the reranker's

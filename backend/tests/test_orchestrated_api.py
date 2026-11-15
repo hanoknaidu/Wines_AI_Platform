@@ -72,6 +72,7 @@ async def _rows(client, sql: str, **params) -> list[dict]:
 
 # --- readiness -----------------------------------------------------------
 
+
 async def test_readyz_says_which_serving_path_is_live(orchestrated_aged):
     body = (await orchestrated_aged.get("/api/v1/readyz")).json()
     assert body["status"] == "ready"
@@ -88,6 +89,7 @@ async def test_readyz_says_which_serving_path_is_live(orchestrated_aged):
 
 # --- the ask workflow, end to end ---------------------------------------
 
+
 async def test_a_question_reaches_the_ask_workflow_and_comes_back_as_cards(orchestrated_aged):
     cid = (await orchestrated_aged.post("/api/v1/conversations", json={})).json()["id"]
     turn_id = await _turn(orchestrated_aged, cid, "a rich bold red, nothing sweet")
@@ -103,11 +105,13 @@ async def test_a_question_reaches_the_ask_workflow_and_comes_back_as_cards(orche
     assert body["taste_profile"]["sweetness"] == "dry"
     assert body["taste_profile"]["body"] == "full"
 
-    log = (await _rows(
-        orchestrated_aged,
-        "select * from transaction_log where turn_id = :t",
-        t=turn_id,
-    ))[0]
+    log = (
+        await _rows(
+            orchestrated_aged,
+            "select * from transaction_log where turn_id = :t",
+            t=turn_id,
+        )
+    )[0]
     assert log["engine"] == "orchestrated"
     assert log["intent"] == "recommend"
     assert log["status"] == "ok"
@@ -142,15 +146,18 @@ async def test_the_usage_frame_reports_the_orchestrated_path(orchestrated_aged):
     cid = (await orchestrated_aged.post("/api/v1/conversations", json={})).json()["id"]
     await _turn(orchestrated_aged, cid, "a smooth red, not sweet, in the middle")
 
-    log = (await _rows(
-        orchestrated_aged, "select * from transaction_log where conversation_id = :c", c=cid
-    ))[0]
+    log = (
+        await _rows(
+            orchestrated_aged, "select * from transaction_log where conversation_id = :c", c=cid
+        )
+    )[0]
     assert log["model"] == "offline"
     assert log["cache_hit"] in (0, False)
     assert log["latency_ms"] >= 0
 
 
 # --- the interview and refine workflows ---------------------------------
+
 
 async def test_the_interview_asks_then_the_ask_workflow_answers(orchestrated_aged):
     cid = (await orchestrated_aged.post("/api/v1/conversations", json={})).json()["id"]
@@ -170,7 +177,9 @@ async def test_the_interview_asks_then_the_ask_workflow_answers(orchestrated_age
     assert 3 <= len(cards) <= 5
     # Three questions, never four (FR-4's cap).
     interview_chips = [
-        p for m in body["messages"] for p in m["parts"]
+        p
+        for m in body["messages"]
+        for p in m["parts"]
         if p["kind"] == "chips" and p["chips"]["kind"] == "interview"
     ]
     assert len(interview_chips) <= 3
@@ -180,18 +189,17 @@ async def test_refine_is_anchored_to_what_the_user_saw(orchestrated_aged):
     cid = (await orchestrated_aged.post("/api/v1/conversations", json={})).json()["id"]
     await _turn(orchestrated_aged, cid, "a rich bold red, nothing sweet")
     before = (await orchestrated_aged.get(f"/api/v1/conversations/{cid}")).json()
-    first = {
-        p["row_id"]
-        for m in before["messages"] for p in m["parts"] if p["kind"] == "card"
-    }
+    first = {p["row_id"] for m in before["messages"] for p in m["parts"] if p["kind"] == "card"}
 
     turn_id = await _turn(orchestrated_aged, cid, "something lighter", "lighter")
     after = (await orchestrated_aged.get(f"/api/v1/conversations/{cid}")).json()
     assert after["taste_profile"]["body"] == "medium"
 
-    log = (await _rows(
-        orchestrated_aged, "select * from transaction_log where turn_id = :t", t=turn_id
-    ))[0]
+    log = (
+        await _rows(
+            orchestrated_aged, "select * from transaction_log where turn_id = :t", t=turn_id
+        )
+    )[0]
     assert log["intent"] == "refine"
 
     # The widened candidate set keeps what was on screen in play rather than starting
@@ -208,6 +216,7 @@ async def test_refine_is_anchored_to_what_the_user_saw(orchestrated_aged):
 
 # --- safety and abstention ----------------------------------------------
 
+
 @pytest.mark.parametrize(
     "utterance",
     [
@@ -221,9 +230,11 @@ async def test_out_of_scope_turns_never_retrieve(orchestrated_aged, utterance):
     cid = (await orchestrated_aged.post("/api/v1/conversations", json={})).json()["id"]
     turn_id = await _turn(orchestrated_aged, cid, utterance)
 
-    log = (await _rows(
-        orchestrated_aged, "select * from transaction_log where turn_id = :t", t=turn_id
-    ))[0]
+    log = (
+        await _rows(
+            orchestrated_aged, "select * from transaction_log where turn_id = :t", t=turn_id
+        )
+    )[0]
     assert log["intent"] == "out_of_scope"
     # The injection attempt is never rewritten, embedded or packed.
     assert not await _rows(
@@ -242,13 +253,13 @@ async def test_abstains_instead_of_widening(orchestrated_aged):
     body = (await orchestrated_aged.get(f"/api/v1/conversations/{cid}")).json()
     assert not [p for m in body["messages"] for p in m["parts"] if p["kind"] == "card"]
     texts = " ".join(
-        p["text"] or ""
-        for m in body["messages"] for p in m["parts"] if p["kind"] == "text"
+        p["text"] or "" for m in body["messages"] for p in m["parts"] if p["kind"] == "text"
     ).lower()
     assert "not" in texts or "nothing" in texts
 
 
 # --- the guard still owns the facts -------------------------------------
+
 
 async def test_the_grounding_guard_outranks_the_orchestrator(orchestrated_aged):
     """Whatever the workflow writes, row-owned fields come from the row."""
@@ -270,6 +281,7 @@ async def test_the_grounding_guard_outranks_the_orchestrator(orchestrated_aged):
 
 
 # --- the runner streams rather than buffering ---------------------------
+
 
 async def test_tokens_reach_a_subscriber_while_the_engine_is_still_running(
     orchestrated_aged,
@@ -326,6 +338,7 @@ async def test_tokens_reach_a_subscriber_while_the_engine_is_still_running(
 
 
 # --- the strict provider switch -----------------------------------------
+
 
 async def test_a_missing_key_degrades_by_default_and_says_so(orchestrated_settings, monkeypatch):
     """A demo must boot and cost nothing; the downgrade is visible, not silent."""

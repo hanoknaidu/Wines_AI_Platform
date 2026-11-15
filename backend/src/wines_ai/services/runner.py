@@ -71,9 +71,7 @@ class TurnRunner:
         started = time.monotonic()
         cid = req.conversation_id
 
-        decision = self.cost_guard.decide(
-            requested_engine=self.settings.engine, user_id=user_id
-        )
+        decision = self.cost_guard.decide(requested_engine=self.settings.engine, user_id=user_id)
         engine = self.engine_factory(decision.engine)
 
         cache_key = turn_cache_key(

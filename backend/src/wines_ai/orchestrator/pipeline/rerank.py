@@ -128,9 +128,7 @@ def rerank(
 
     for candidate in candidates:
         doc_terms = set(tokenize(document_text(candidate.row)))
-        overlap = (
-            len(query_terms & doc_terms) / len(query_terms) if query_terms else 0.0
-        )
+        overlap = len(query_terms & doc_terms) / len(query_terms) if query_terms else 0.0
         variety_terms = set(tokenize(candidate.row.variety))
         # An explicitly named varietal is the strongest signal a user can send, and
         # the one the dense arm is worst at: "Malbec" and "Merlot" embed close

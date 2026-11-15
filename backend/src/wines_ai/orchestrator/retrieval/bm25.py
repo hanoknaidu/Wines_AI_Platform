@@ -26,6 +26,7 @@ _WORD = re.compile(r"[a-z0-9']+")
 K1 = 1.5
 B = 0.75
 
+
 # Light stemming: enough to make "oaked"/"oaky"/"oak" and "berries"/"berry" collide,
 # with no dependency. Deliberately not Porter - the long tail of a tasting-note
 # vocabulary is small, and an aggressive stemmer conflates "fruity" with "fruit" in

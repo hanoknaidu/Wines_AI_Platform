@@ -245,10 +245,7 @@ async def run(
 
     # Per-axis distances, for the templated copy and the hedging. Computed from the
     # same ranking module lane 2 uses, so the two engines explain a match identically.
-    scored_by_id = {
-        s.row.row_id: s
-        for s in ranking.rank([c.row for c in chosen], working_profile)
-    }
+    scored_by_id = {s.row.row_id: s for s in ranking.rank([c.row for c in chosen], working_profile)}
 
     # --- J: generate ------------------------------------------------------
     # The refine workflow pins its own model; a recommend turn picks by complexity.
@@ -382,9 +379,23 @@ async def run(
 # Words that mark a request needing more than a match: a comparison or a pairing has
 # to reason across rows or beyond the axes, which is where Opus earns its 2x price.
 _COMPLEX_CUES = (
-    " vs ", " versus ", "compare", "compared", "difference between", "better than",
-    "pair with", "pairs with", "pairing", "go with", "goes with", "with steak",
-    "with fish", "with dinner", "with dessert", "with cheese", "for a dinner",
+    " vs ",
+    " versus ",
+    "compare",
+    "compared",
+    "difference between",
+    "better than",
+    "pair with",
+    "pairs with",
+    "pairing",
+    "go with",
+    "goes with",
+    "with steak",
+    "with fish",
+    "with dinner",
+    "with dessert",
+    "with cheese",
+    "for a dinner",
 )
 
 
@@ -543,9 +554,7 @@ async def _fan_out(ctx: Context, requests: list, fallbacks: list[str]) -> list[s
     if not requests:
         return []
     try:
-        ctx.ledger.check(
-            about_to_spend=sum(ctx.gateway.estimate_cost(req) for req in requests)
-        )
+        ctx.ledger.check(about_to_spend=sum(ctx.gateway.estimate_cost(req) for req in requests))
     except BudgetExceeded as exc:
         ctx.state.degraded_reason = "turn_budget"
         METRICS.incr("ask.budget_degrade")

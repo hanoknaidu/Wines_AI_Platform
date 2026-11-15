@@ -38,9 +38,7 @@ def _frame_no_id(name: str, data: dict) -> bytes:
     return f"event: {name}\ndata: {json.dumps(data, default=str)}\n\n".encode()
 
 
-@router.post(
-    "/conversations/{cid}/messages", response_model=SendMessageResponse, status_code=202
-)
+@router.post("/conversations/{cid}/messages", response_model=SendMessageResponse, status_code=202)
 async def send(
     cid: str,
     body: SendMessageRequest,
@@ -133,18 +131,14 @@ async def send(
         utterance=body.content,
         selected_chip_id=body.selected_chip_id,
         profile=profile,
-        history=[
-            {"role": m["role"], "seq": m["seq"]} for m in transcript[-10:]
-        ],
+        history=[{"role": m["role"], "seq": m["seq"]} for m in transcript[-10:]],
         previous_row_ids=previous_row_ids,
         asked_count=asked_count,
         dataset_version=conversation["dataset_version"],
     )
 
     assert services.runner is not None
-    entry.task = asyncio.create_task(
-        services.runner.run(entry=entry, req=req, user_id=user_id)
-    )
+    entry.task = asyncio.create_task(services.runner.run(entry=entry, req=req, user_id=user_id))
 
     out = SendMessageResponse(turn_id=turn_id, user_message_id=message["id"], seq=user_seq)
     async with services.db.begin() as conn:

@@ -82,9 +82,7 @@ async def write_retrieval(
     )
 
 
-async def write_checkpoint(
-    conn: AsyncConnection, *, turn_id: str, node: str, state: dict
-) -> None:
+async def write_checkpoint(conn: AsyncConnection, *, turn_id: str, node: str, state: dict) -> None:
     await conn.execute(
         graph_checkpoint.insert()
         .prefix_with("OR REPLACE")
@@ -166,9 +164,7 @@ async def global_cost_today(conn: AsyncConnection) -> float:
     return float(total or 0.0)
 
 
-async def idempotency_get(
-    conn: AsyncConnection, *, key: str, endpoint: str
-) -> dict | None:
+async def idempotency_get(conn: AsyncConnection, *, key: str, endpoint: str) -> dict | None:
     stmt = select(idempotency_key).where(
         and_(idempotency_key.c.key == key, idempotency_key.c.endpoint == endpoint)
     )
@@ -193,8 +189,11 @@ async def idempotency_put(
     retention_seconds: int,
 ) -> None:
     expires = (
-        _dt.datetime.now(_dt.UTC) + _dt.timedelta(seconds=retention_seconds)
-    ).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        (_dt.datetime.now(_dt.UTC) + _dt.timedelta(seconds=retention_seconds))
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
     await conn.execute(
         idempotency_key.insert()
         .prefix_with("OR REPLACE")

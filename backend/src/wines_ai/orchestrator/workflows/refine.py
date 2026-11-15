@@ -40,8 +40,14 @@ async def read_delta(ctx: Context) -> tuple[dict | None, str]:
     if chip is not None:
         return chip, "lexical"
     seen = [
-        {"row_id": r.row_id, "variety": r.variety, "sweetness": r.sweetness,
-         "body": r.body, "oak": r.oak, "tannin": r.tannin}
+        {
+            "row_id": r.row_id,
+            "variety": r.variety,
+            "sweetness": r.sweetness,
+            "body": r.body,
+            "oak": r.oak,
+            "tannin": r.tannin,
+        }
         for rid in state.previous_row_ids[:5]
         if (r := ctx.index.resolve(rid)) is not None
     ]
@@ -87,10 +93,7 @@ async def run(ctx: Context):
     patch, blocked = refine_mod.apply(state.profile, chip)
     if blocked:
         yield Checkpoint(node="refine_blocked", state={"chip": chip["id"], "reason": blocked})
-        text = (
-            f"I cannot go further that way - {blocked}. "
-            "Try one of the other adjustments below."
-        )
+        text = f"I cannot go further that way - {blocked}. Try one of the other adjustments below."
         words = text.split(" ")
         for idx, word in enumerate(words):
             yield Token(text=word if idx == len(words) - 1 else word + " ")

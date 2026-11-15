@@ -92,9 +92,7 @@ def _str_list(value, limit: int) -> list[str]:
 class AnthropicWebSearcher:
     name = "anthropic-web-search"
 
-    def __init__(
-        self, *, api_key: str, model: str, max_uses: int, timeout_seconds: float
-    ) -> None:
+    def __init__(self, *, api_key: str, model: str, max_uses: int, timeout_seconds: float) -> None:
         from anthropic import AsyncAnthropic
 
         self._client = AsyncAnthropic(api_key=api_key, timeout=timeout_seconds)

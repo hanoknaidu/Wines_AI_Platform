@@ -67,9 +67,7 @@ async def run(ctx: Context):
     # explicitly outranks one inferred from this turn's phrasing.
     if state.intent != "out_of_scope":
         patch = {
-            axis: value
-            for axis, value in state.slots.items()
-            if state.profile.get(axis) is None
+            axis: value for axis, value in state.slots.items() if state.profile.get(axis) is None
         }
         if patch:
             state.profile.update(patch)

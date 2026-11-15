@@ -26,14 +26,10 @@ async def readyz(services: ServicesDep) -> ReadyResponse:
     if not services.ready or db != "ok":
         from fastapi.responses import JSONResponse
 
-        body = ReadyResponse(
-            status="not_ready", db=db, engine=services.settings.engine
-        ).model_dump(by_alias=True)
-        body["detail"] = (
-            services.dataset_error
-            or services.provider_error
-            or "database unavailable"
+        body = ReadyResponse(status="not_ready", db=db, engine=services.settings.engine).model_dump(
+            by_alias=True
         )
+        body["detail"] = services.dataset_error or services.provider_error or "database unavailable"
         body["serving"] = services.describe_engine()
         return JSONResponse(body, status_code=503)
 

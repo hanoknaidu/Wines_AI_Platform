@@ -34,7 +34,7 @@ class SeqAllocator:
             current = self._counters.get(cid)
             if current is None:
                 async with self.db.connect() as conn:
-                    current = (await messages_repo.max_seq(conn, cid=cid))
+                    current = await messages_repo.max_seq(conn, cid=cid)
                 self._counters[cid] = current
             nxt = current + 1
             self._counters[cid] = nxt
