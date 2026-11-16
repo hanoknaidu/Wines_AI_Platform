@@ -14,6 +14,7 @@ the recommendation cards.
 
 from __future__ import annotations
 
+import difflib
 import re
 import unicodedata
 
@@ -123,6 +124,21 @@ def find_varieties(utterance: str, rows: list[WineRow], *, limit: int = 3) -> li
         base = _base(row.variety)
         if base and _contains(text, base):
             hits.setdefault(base, []).append(row)
+
+    if not hits:
+        # Typos and speech-to-text slips ("cabinet sauvignon", "pino noir"): compare
+        # each run of words the same length as a variety name, and accept a close one.
+        words = re.findall(r"[a-z']+", text)
+        bases = {_base(row.variety) for row in rows} | set(_ALIASES)
+        for base in sorted(bases, key=len, reverse=True):
+            n = len(base.split())
+            grams = {" ".join(words[i : i + n]) for i in range(len(words) - n + 1)}
+            if len(base) >= 5 and difflib.get_close_matches(base, grams, n=1, cutoff=0.8):
+                target = _ALIASES.get(base, base)
+                matched = [r for r in rows if _base(r.variety) == target]
+                if matched:
+                    hits[target] = matched
+                    break
 
     names = sorted(hits, key=len, reverse=True)
     kept: list[str] = []

@@ -55,6 +55,13 @@ class DeterministicEngine:
         # axis falls back. Usage is emitted at the end carrying what actually
         # happened, because transaction_log.intent feeds the intent eval set and a
         # turn mislabelled 'interview' while serving five cards corrupts it.
+        if (
+            intent in ("interview", "recommend")
+            and not req.selected_chip_id
+            and not interview.read_any(req.utterance)
+            and explain.find_varieties(req.utterance, self.index.rows)
+        ):
+            intent = "explain"
         ctx = {"intent": intent}
 
         if intent == "out_of_scope":

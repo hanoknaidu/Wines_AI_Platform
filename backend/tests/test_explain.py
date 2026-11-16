@@ -62,3 +62,16 @@ def test_producers_come_only_from_rows():
     for name in rows[0].example_producers:
         assert name in line
     assert "Cabernet Sauvignon" in explain.describe(rows)
+
+
+@pytest.mark.parametrize(
+    ("utterance", "expected"),
+    [
+        ("describe about cabinet sauvignon", ["Cabernet Sauvignon"]),
+        ("pino noir?", ["Pinot Noir"]),
+        ("red", []),
+        ("something light", []),
+    ],
+)
+def test_find_varieties_tolerates_typos(utterance, expected):
+    assert [r.variety for r in explain.find_varieties(utterance, ROWS)] == expected

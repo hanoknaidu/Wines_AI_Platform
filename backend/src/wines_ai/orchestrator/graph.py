@@ -33,6 +33,7 @@ from __future__ import annotations
 import logging
 
 from ..observability import METRICS, log
+from ..taste import explain as explain_mod
 from ..taste import interview as interview_mod
 from ..turns.engine import Checkpoint, ProfilePatch
 from .router import route
@@ -60,6 +61,17 @@ async def run(ctx: Context):
         },
     )
     METRICS.incr(f"intent.{state.intent}")
+
+    # A message that names a grape and states no taste ("cabernet sauvignon?") is a
+    # question about that grape, not an interview answer.
+    if (
+        state.intent in ("interview", "recommend")
+        and state.intent_source != "chip"
+        and not state.slots
+        and explain_mod.find_varieties(state.utterance, ctx.index.rows)
+    ):
+        state.intent = "explain"
+        METRICS.incr("router.variety_to_explain")
 
     # --- node: slot_merge ------------------------------------------------
     # Everything the turn stated, written into the profile once, before any workflow
