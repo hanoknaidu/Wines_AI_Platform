@@ -81,3 +81,17 @@ class TurnRegistry:
     def cancel_all(self) -> None:
         for turn_id in list(self._by_turn):
             self.cancel(turn_id)
+
+    async def drain(self, grace_s: float) -> None:
+        """Cancel every in-flight turn and wait for each to unwind.
+
+        Cancelling is not enough at shutdown: a cancelled turn still runs its
+        `finally`, which writes the turn's transaction_log row. Disposing the db
+        engine before that finishes leaves the write hanging on a closing
+        connection (seen as an intermittent CI hang) or loses the row. `grace_s`
+        bounds the wait so a stuck turn cannot hold shutdown open.
+        """
+        tasks = [e.task for e in self._by_turn.values() if e.task is not None and not e.task.done()]
+        self.cancel_all()
+        if tasks:
+            await asyncio.wait(tasks, timeout=grace_s)

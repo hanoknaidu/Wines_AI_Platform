@@ -57,7 +57,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             yield
         finally:
-            services.registry.cancel_all()
+            # Turns must finish unwinding (they write their log row) before the
+            # engine goes; see TurnRegistry.drain.
+            await services.registry.drain(grace_s=10)
             await db.dispose()
             log(logger, logging.INFO, "shutdown")
 
