@@ -58,7 +58,7 @@ class DeterministicEngine:
         if (
             intent in ("interview", "recommend")
             and not req.selected_chip_id
-            and not interview.read_any(req.utterance)
+            and (not interview.read_any(req.utterance) or explain.is_question(req.utterance))
             and explain.find_varieties(req.utterance, self.index.rows)
         ):
             intent = "explain"

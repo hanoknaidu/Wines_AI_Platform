@@ -67,7 +67,9 @@ async def run(ctx: Context):
     if (
         state.intent in ("interview", "recommend")
         and state.intent_source != "chip"
-        and not state.slots
+        # The model router reads "Cabernet Sauvignon" as color=red, so slots alone
+        # cannot rule a question out: an explicit question ("describe ...") wins.
+        and (not state.slots or explain_mod.is_question(state.utterance))
         and explain_mod.find_varieties(state.utterance, ctx.index.rows)
     ):
         state.intent = "explain"
