@@ -19,7 +19,7 @@ from .config import get_settings
 Vote = Literal["up", "down"]
 Role = Literal["user", "assistant"]
 PartKind = Literal["text", "card", "chips", "citation", "error"]
-Intent = Literal["interview", "recommend", "refine", "out_of_scope"]
+Intent = Literal["interview", "recommend", "refine", "explain", "out_of_scope"]
 TurnStatus = Literal["ok", "cancelled", "error"]
 
 

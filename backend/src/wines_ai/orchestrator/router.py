@@ -41,7 +41,7 @@ from .state import GraphState
 
 logger = logging.getLogger("wines_ai.router")
 
-VALID_INTENTS = ("interview", "recommend", "refine", "out_of_scope")
+VALID_INTENTS = ("interview", "recommend", "refine", "explain", "out_of_scope")
 
 # Below this, the keyword answer is used instead. Set where it is because the keyword
 # router's own floor is 0.8: a model less sure than that has added nothing.

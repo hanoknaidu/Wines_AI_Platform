@@ -191,7 +191,9 @@ ROUTE = Prompt(
     # 28/28 on the harness suite on two consecutive runs (2026-11-11). v1 was never run
     # against that suite, so this is a measured prompt replacing an unmeasured one -
     # not a measured improvement over v1.
-    version="2",
+    # v3: adds the `explain` intent (knowledge questions answered directly instead of
+    # being pushed into the taste interview).
+    version="3",
     model_role="router",
     instructions=ROUTE_GUIDE,
     schema=_schema(
@@ -199,7 +201,7 @@ ROUTE = Prompt(
         {
             "intent": {
                 "type": "string",
-                "enum": ["interview", "recommend", "refine", "out_of_scope"],
+                "enum": ["interview", "recommend", "refine", "explain", "out_of_scope"],
             },
             "confidence": {"type": "number"},
             "out_of_scope_topic": {"type": ["string", "null"]},
@@ -314,6 +316,33 @@ than a surprise.
 One or two sentences. No producer name, no region, no price, no availability, no health \
 claim. Do not repeat the tasting note verbatim; the card already shows it.""",
     max_tokens=512,
+    effort="low",
+)
+
+EXPLAIN = Prompt(
+    id="explain",
+    version="1",
+    model_role="generator",
+    instructions="""\
+The user asked a question about wine - usually "describe X" or "what is X" for a grape \
+or style - rather than answering the taste interview. Answer the question directly.
+
+When `rows` are supplied, they are the catalogue rows for what the user asked about. \
+Write ONE short paragraph (3-5 sentences) describing it for a novice: what it tastes \
+like, how heavy it feels, how sweet it is, whether it is oaky or grippy, and where it is \
+typically grown - all taken from the rows. If several rows are supplied (e.g. oaked and \
+unoaked Chardonnay), say briefly how they differ. End with one sentence on the kind of \
+food or moment it suits, in general terms.
+
+When `rows` is empty, the question is about a general wine idea (what tannin is, what \
+"body" means, how sparkling wine differs from still). Explain the idea in plain \
+everyday words in 2-4 sentences. That is vocabulary, not a fact about a specific wine. \
+If it is not a wine question at all, say in one sentence that you can help with wine \
+questions and finding wines to suit their taste.
+
+Do NOT name any producer or brand - a vetted list is appended after you. No price, \
+availability, vintage or health claim. No markdown, no headings, no list.""",
+    max_tokens=640,
     effort="low",
 )
 
@@ -470,6 +499,7 @@ PROMPTS: dict[str, Prompt] = {
         DECOMPOSE,
         LEAD_IN,
         CARD_REASON,
+        EXPLAIN,
         VERIFY,
         INTERVIEW_SUGGEST,
         REFINE_DELTA,

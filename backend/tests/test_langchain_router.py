@@ -94,14 +94,14 @@ def _state(utterance, profile=None, previous=None):
 # --- the prompt -----------------------------------------------------------
 
 
-def test_route_v2_is_the_tested_guide_from_disk():
+def test_route_v3_is_the_tested_guide_from_disk():
     on_disk = (
         Path(__file__).parents[1] / "src" / "wines_ai" / "orchestrator" / "intent_prompt.md"
     ).read_text(encoding="utf-8")
-    assert ROUTE.version == "2"
+    assert ROUTE.version == "3"
     assert ROUTE.instructions == ROUTE_GUIDE == on_disk
     req = ROUTE.build(HAIKU, {"utterance": "x"})
-    assert req.prompt_id == "route@2"
+    assert req.prompt_id == "route@3"
     assert req.system[-1].text == on_disk and req.system[-1].cacheable
 
 
@@ -146,7 +146,7 @@ def test_route_goes_to_the_router_and_is_recorded_in_the_ledger():
 
     assert router.calls == 1 and upstream.calls == 0
     [call] = ledger.trace()
-    assert call["prompt_id"] == "route@2" and call["model"] == HAIKU
+    assert call["prompt_id"] == "route@3" and call["model"] == HAIKU
     assert call["cache_read"] == 4000 and call["tokens_in"] == 60
     assert call["cost_usd"] > 0, "a live routing call must be priced, not recorded as free"
 
@@ -349,7 +349,7 @@ def test_the_request_carries_nothing_haiku_5_5_rejects():
     assert payload["output_config"]["effort"] == "low"
     assert payload["tool_choice"] == {"type": "tool", "name": "Route"}
     intent = payload["tools"][0]["input_schema"]["properties"]["intent"]
-    assert intent["enum"] == ["interview", "recommend", "refine", "out_of_scope"]
+    assert intent["enum"] == ["interview", "recommend", "refine", "explain", "out_of_scope"]
 
 
 def test_reasoning_is_written_before_the_intent_is_chosen():

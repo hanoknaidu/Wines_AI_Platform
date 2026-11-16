@@ -10,7 +10,7 @@
 export type Vote = "up" | "down";
 export type Role = "user" | "assistant";
 export type PartKind = "text" | "card" | "chips" | "citation" | "error";
-export type Intent = "interview" | "recommend" | "refine" | "out_of_scope";
+export type Intent = "interview" | "recommend" | "refine" | "explain" | "out_of_scope";
 export type TurnStatus = "ok" | "cancelled" | "error";
 
 /** One taste axis as served. `label` is ALREADY hedged where confidence is low — the

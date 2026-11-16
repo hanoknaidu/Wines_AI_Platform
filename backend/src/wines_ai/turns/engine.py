@@ -11,7 +11,7 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from typing import Literal, Protocol, runtime_checkable
 
-Intent = Literal["interview", "recommend", "refine", "out_of_scope"]
+Intent = Literal["interview", "recommend", "refine", "explain", "out_of_scope"]
 
 
 @dataclass
