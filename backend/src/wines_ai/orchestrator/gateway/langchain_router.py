@@ -47,7 +47,7 @@ from .types import ModelRequest, ModelResult
 
 logger = logging.getLogger("wines_ai.gateway.langchain_router")
 
-Intent = Literal["interview", "recommend", "refine", "out_of_scope"]
+Intent = Literal["interview", "recommend", "refine", "explain", "out_of_scope"]
 Style = Literal["red", "white", "rose", "sparkling", "dessert"]
 Sweetness = Literal["dry", "off_dry", "sweet"]
 Body = Literal["light", "medium", "full"]
@@ -87,8 +87,9 @@ def _schema():
                 "Which workflow handles this turn. 'interview' keeps learning the "
                 "user's taste because the profile is not yet sufficient. 'recommend' "
                 "serves wines because it is. 'refine' corrects one axis of a result "
-                "set the user has already seen. 'out_of_scope' declines something the "
-                "dataset cannot answer."
+                "set the user has already seen. 'explain' answers a question about a "
+                "grape, wine style or wine idea ('describe Cabernet Sauvignon'). "
+                "'out_of_scope' declines something the dataset cannot answer."
             )
         )
         confidence: float = Field(

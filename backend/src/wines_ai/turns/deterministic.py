@@ -17,7 +17,7 @@ from ..config import Settings
 from ..dataset.loader import DatasetIndex
 from ..taste import copy as copytext
 from ..taste import diversify as div
-from ..taste import interview, ranking, refine
+from ..taste import explain, interview, ranking, refine
 from .engine import (
     CardEvent,
     Checkpoint,
@@ -60,6 +60,9 @@ class DeterministicEngine:
         if intent == "out_of_scope":
             async for event in self._out_of_scope(topic or "generic"):
                 yield event
+        elif intent == "explain":
+            async for event in self._explain(req):
+                yield event
         elif intent == "refine":
             async for event in self._refine(req, profile, ctx):
                 yield event
@@ -82,6 +85,37 @@ class DeterministicEngine:
         yield Checkpoint(node="safety", state={"topic": topic})
         async for token in self._stream(copytext.out_of_scope(topic)):
             yield token
+
+    # --- 5 - explain -----------------------------------------------------
+    async def _explain(self, req: TurnRequest) -> AsyncIterator[TurnEvent]:
+        """A question about wine, answered from the matched rows. Profile untouched."""
+        rows = explain.find_varieties(req.utterance, self.index.rows)
+        yield Checkpoint(node="explain", state={"row_ids": [r.row_id for r in rows]})
+        text = explain.describe(rows)
+        if rows:
+            line = explain.producers_line(rows)
+            text += (f"\n\n{line}" if line else "") + f"\n\n{explain.NUDGE}"
+        async for token in self._stream(text):
+            yield token
+        threshold = self.settings.confidence_threshold
+        for row in rows:
+            yield CardEvent(
+                row_id=row.row_id,
+                payload={
+                    "row_id": row.row_id,
+                    "variety": row.variety,
+                    "style": row.style,
+                    "axes": copytext.axis_readings(row, threshold),
+                    "description": copytext.tastes_like(row),
+                    "why_it_matches": f"The {row.variety} you asked about.",
+                    "typical_regions": list(row.typical_regions),
+                    "example_producers": list(row.example_producers),
+                    "review_status": row.review_status,
+                    "dataset_version": row.dataset_version,
+                },
+            )
+        if rows:
+            yield CitationEvent(row_ids=[r.row_id for r in rows])
 
     # --- 1 - interview ---------------------------------------------------
     async def _interview(

@@ -111,6 +111,8 @@ class OfflineProvider:
             return _lead_in(payload)
         if kind == "interview_suggest":
             return payload.get("fallback") or ""
+        if kind == "explain":
+            return payload.get("fallback") or ""
         if kind == "card_reason":
             return payload.get("fallback") or ""
         if kind == "templated":

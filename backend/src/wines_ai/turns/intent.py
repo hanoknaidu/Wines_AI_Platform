@@ -1,6 +1,6 @@
 """Keyword + slot-state intent router.
 
-Returns the same four intents lane 3's Haiku router returns, with a confidence, so
+Returns the same five intents lane 3's Haiku router returns, with a confidence, so
 transaction_log.intent and intent_eval have real data before the model exists and the
 confusion matrix can be built against this baseline.
 """
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 
-from ..taste import interview, refine
+from ..taste import explain, interview, refine
 
 OUT_OF_SCOPE_TOPICS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("price", ("how much", "price", "cost", "cheap", "expensive", "budget", "$", "£", "under 20")),
@@ -115,6 +115,11 @@ def classify(
 
     if has_results and refine.detect(utterance) is not None:
         return "refine", 0.9, None
+
+    # A question to be answered ("describe Cabernet Sauvignon") is not a step in the
+    # taste interview. Checked after refine so "what's lighter than that" still refines.
+    if explain.is_question(utterance):
+        return "explain", 0.85, None
 
     harvested = interview.read_any(utterance)
     merged = {**profile, **harvested}

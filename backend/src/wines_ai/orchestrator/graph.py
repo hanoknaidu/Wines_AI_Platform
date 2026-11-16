@@ -65,7 +65,9 @@ async def run(ctx: Context):
     # Everything the turn stated, written into the profile once, before any workflow
     # reads it. Only unfilled axes are written: a stored answer the user gave
     # explicitly outranks one inferred from this turn's phrasing.
-    if state.intent != "out_of_scope":
+    # A question ("describe Cabernet") states no preference, so nothing it mentions is
+    # written into the taste profile.
+    if state.intent not in ("out_of_scope", "explain"):
         patch = {
             axis: value for axis, value in state.slots.items() if state.profile.get(axis) is None
         }
@@ -114,6 +116,8 @@ def _dispatch(state) -> str:
     """
     if state.intent == "out_of_scope":
         return "out_of_scope"
+    if state.intent == "explain":
+        return "explain"
     if state.intent == "refine" and state.previous_row_ids:
         return "refine"
     if interview_mod.is_sufficient(state.profile):
