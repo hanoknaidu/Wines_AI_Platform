@@ -69,3 +69,34 @@ extend-exclude = ["alembic/versions"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src/wines_ai"]
+# Third-party packages without type stubs are treated as Any instead of failing.
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+# Baseline: these modules had type errors when mypy was added to CI (30 errors,
+# mostly SDK stub mismatches and **kwargs into ModelResult; a few real Optional
+# gaps in workflows/ask.py and api/v1/health.py). They are exempt so CI blocks
+# NEW errors only. Fix a module, then delete it from this list - mypy will
+# start checking it on the next run.
+[[tool.mypy.overrides]]
+module = [
+    "wines_ai.taste.refine",
+    "wines_ai.db.repositories.profile",
+    "wines_ai.orchestrator.gateway",
+    "wines_ai.orchestrator.gateway.anthropic_provider",
+    "wines_ai.orchestrator.gateway.langchain_router",
+    "wines_ai.orchestrator.retrieval.vector_store",
+    "wines_ai.orchestrator.workflows.ask",
+    "wines_ai.ingest.web_search",
+    "wines_ai.api.v1.health",
+]
+ignore_errors = true
+
+[tool.bandit]
+# Tests use assert by design.
+exclude_dirs = ["tests"]
