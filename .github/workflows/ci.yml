@@ -22,6 +22,10 @@ env:
   UV_VERSION: "0.9.7"      # same uv as the Dockerfile
   PYTHON_VERSION: "3.12"
   NODE_VERSION: "22"       # same Node as frontend/Dockerfile
+  # Pinned so a new tool release cannot turn the merge gate red on its own.
+  MYPY_VERSION: "2.4.1"
+  BANDIT_VERSION: "1.9.4"
+  PIP_AUDIT_VERSION: "2.10.1"
 
 jobs:
   # ---------------------------------------------------------------- backend
@@ -46,6 +50,97 @@ jobs:
         run: uv run --frozen --extra dev ruff check . --output-format github
       - name: ruff format --check
         run: uv run --frozen --extra dev ruff format --check --diff .
+      # Report only: the two steps above are the gate.
+      - name: Lint HTML report
+        if: always()
+        run: |
+          mkdir -p reports
+          uv run --frozen --extra dev ruff check . --output-format json --exit-zero > reports/ruff.json
+          python scripts/ci_html_report.py ruff reports/ruff.json reports/lint.html
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-lint-report
+          path: backend/reports/lint.html
+          retention-days: 14
+
+  backend-typecheck:
+    name: Backend / type check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      # `orchestrator` so the anthropic/langchain types are real, not Any.
+      # Config (and the baseline of exempt modules) is [tool.mypy] in pyproject.toml.
+      # lxml is what mypy's --html-report needs.
+      - name: mypy
+        run: >
+          uv run --frozen --extra dev --extra orchestrator
+          --with mypy==${{ env.MYPY_VERSION }} --with lxml
+          mypy --html-report reports/mypy
+      - name: Upload type-check report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-typecheck-report
+          path: backend/reports/mypy/
+          retention-days: 14
+
+  backend-security:
+    name: Backend / security scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: mkdir -p reports
+      # Code scan. The HTML lists every finding; the gate fails on medium+ severity
+      # only (-ll), so low-severity notes (e.g. `random` for sampling) don't block.
+      - name: bandit (HTML report)
+        if: always()
+        run: uvx bandit==${{ env.BANDIT_VERSION }} -c pyproject.toml -r src -f html -o reports/bandit.html --exit-zero
+      - name: bandit (gate, medium+ severity)
+        run: uvx bandit==${{ env.BANDIT_VERSION }} -c pyproject.toml -r src -ll
+      # Dependency scan of exactly what ships: the locked runtime + orchestrator deps,
+      # no dev tools. --no-deps because the export is already the full resolved set.
+      - name: pip-audit
+        if: always()
+        run: |
+          uv export --frozen --extra orchestrator --no-hashes --no-emit-project -o reports/requirements.txt
+          set +e
+          uvx pip-audit==${{ env.PIP_AUDIT_VERSION }} -r reports/requirements.txt \
+            --disable-pip --no-deps -f json -o reports/pip-audit.json
+          rc=$?
+          set -e
+          python scripts/ci_html_report.py pip-audit reports/pip-audit.json reports/dependencies.html
+          exit $rc
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-security-reports
+          path: |
+            backend/reports/bandit.html
+            backend/reports/dependencies.html
+          retention-days: 14
 
   backend-test:
     name: Backend / unit tests

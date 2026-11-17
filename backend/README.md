@@ -197,3 +197,20 @@ wrong.
 (one setting, free until your types are written), whether the ~45-row unreviewed seed
 is the right stand-in for band 4's artifact, and whether the Anthropic client belongs
 here or with the orchestrator.
+
+## CI checks (run locally)
+
+The same checks `.github/workflows/ci.yml` runs on every PR into `main`:
+
+```bash
+uv run --extra dev ruff check . && uv run --extra dev ruff format --check .   # lint + format
+uv run --extra dev --extra orchestrator --with mypy mypy                      # types ([tool.mypy])
+uvx bandit -c pyproject.toml -r src -ll                                       # code security
+uv export --frozen --extra orchestrator --no-hashes --no-emit-project -o /tmp/req.txt \
+  && uvx pip-audit -r /tmp/req.txt --disable-pip --no-deps                    # dependency CVEs
+uv run --extra dev --extra orchestrator pytest                                # unit tests
+```
+
+mypy exempts a baseline of modules listed in `pyproject.toml`; remove one once it's clean.
+HTML reports (lint, types, bandit, dependencies, tests, coverage) are attached to each
+CI run as artifacts.
