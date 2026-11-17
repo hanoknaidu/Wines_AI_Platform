@@ -1,0 +1,13 @@
+# Non-secret backend settings. WA_COOKIE_SECRET lives in the `backend-secret`
+# Secret (created once, never committed; cd.yml creates it if it is missing).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  WA_COOKIE_SECURE: "false"          # plain HTTP on the LoadBalancer IP, no TLS yet
+  # The browser only talks to nginx, which proxies /api same-origin, so CORS is
+  # not exercised; keep this list in sync if the API is ever called cross-origin.
+  WA_CORS_ORIGINS: '["http://localhost:5180"]'
+  WA_ENGINE: deterministic
+  WA_LLM_PROVIDER: offline
