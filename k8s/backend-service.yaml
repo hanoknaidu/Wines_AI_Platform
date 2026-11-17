@@ -1,10 +1,11 @@
 # Name must be `backend`: the frontend's nginx proxies /api to http://backend:8010.
+# LoadBalancer: Azure assigns a public IP. Open http://<EXTERNAL-IP>:8010.
 apiVersion: v1
 kind: Service
 metadata:
   name: backend
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector: {app: backend}
   ports:
     - port: 8010
