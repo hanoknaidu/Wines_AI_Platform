@@ -47,6 +47,9 @@ class GraphState:
     # turn labelled 'interview' while serving five cards corrupts it.
     effective_intent: str = ""
     slots: dict[str, str] = field(default_factory=dict)
+    # A one-off request ("for a tasting", "as a gift") shapes this turn's answer but is
+    # not written to the stored taste profile. See taste/scope.py.
+    one_off: bool = False
     query: str = ""
     rewrite_source: str = ""
     sub_queries: list[str] = field(default_factory=list)
@@ -68,6 +71,7 @@ class GraphState:
             "effective_intent": self.effective_intent or self.intent,
             "out_of_scope_topic": self.out_of_scope_topic,
             "slots": dict(self.slots),
+            "one_off": self.one_off,
             "profile": {k: v for k, v in self.profile.items() if v},
             "query": self.query,
             "rewrite_source": self.rewrite_source,

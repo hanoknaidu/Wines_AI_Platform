@@ -415,3 +415,33 @@ def test_deterministic_engine_is_free():
 def test_unknown_model_costs_zero_rather_than_raising():
     """A pricing gap must not be able to fail a user's turn."""
     assert pricing.cost_usd("some-future-model", 1000, 1000) == 0.0
+
+
+# --- one-off request scope -------------------------------------------------
+
+import pytest as _pytest  # noqa: E402
+
+from wines_ai.taste.scope import is_one_off  # noqa: E402
+
+
+@_pytest.mark.parametrize(
+    "text",
+    [
+        "a sweet white for a tasting",
+        "I want a sweeter wine for tasting",
+        "something as a gift for my dad",
+        "a red for the party",
+        "just this once, something oaky",
+        "what should I open for tonight",
+    ],
+)
+def test_one_off_requests_are_recognised(text):
+    assert is_one_off(text)
+
+
+@_pytest.mark.parametrize(
+    "text",
+    ["I like dry wines", "a rich bold red, nothing sweet", "something sweeter", "", "giftedly"],
+)
+def test_ordinary_preferences_are_not_one_off(text):
+    assert not is_one_off(text)

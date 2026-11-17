@@ -101,10 +101,12 @@ async def run(ctx: Context):
         return
 
     state.profile.update(patch)
-    yield ProfilePatch(
-        values=patch,
-        confidence={axis: {"confidence": 1.0, "provenance": "refined"} for axis in patch},
-    )
+    # "Something sweeter for the tasting" moves this answer, not the stored taste.
+    if not state.one_off:
+        yield ProfilePatch(
+            values=patch,
+            confidence={axis: {"confidence": 1.0, "provenance": "refined"} for axis in patch},
+        )
     yield Checkpoint(node="refine", state={"chip": chip["id"], "patch": patch})
 
     # Trailing space: the next text run is concatenated by the client's reducer.

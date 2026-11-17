@@ -35,6 +35,7 @@ import logging
 from ..observability import METRICS, log
 from ..taste import explain as explain_mod
 from ..taste import interview as interview_mod
+from ..taste import scope as scope_mod
 from ..turns.engine import Checkpoint, ProfilePatch
 from .router import route
 from .state import Context
@@ -87,8 +88,15 @@ async def run(ctx: Context):
         patch = {
             axis: value for axis, value in state.slots.items() if state.profile.get(axis) != value
         }
+        # A one-off ("a sweet wine for a tasting") applies to this turn only: the
+        # in-memory profile drives this answer, the stored one is left alone, so the
+        # next turn goes back to what the user actually likes.
+        state.one_off = scope_mod.is_one_off(state.utterance)
         if patch:
             state.profile.update(patch)
+        if patch and state.one_off:
+            METRICS.incr("slot_merge.one_off")
+        elif patch:
             provenance = "asked" if state.intent_source == "chip" else "inferred"
             yield ProfilePatch(
                 values=patch,

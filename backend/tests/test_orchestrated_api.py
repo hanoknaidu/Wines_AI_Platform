@@ -398,3 +398,49 @@ async def test_strict_mode_refuses_rather_than_serving_templated_copy(
     # Readiness is what gates the chat routes, so the conversation is refused too.
     assert created.status_code == 503
     assert created.json()["code"] in ("dataset_unavailable", "engine_unavailable")
+
+
+# --- multi-turn taste context ---------------------------------------------
+
+
+async def _complete_state(client, turn_id: str) -> dict:
+    import json
+
+    rows = await _rows(
+        client,
+        "select state_json from graph_checkpoint where turn_id = :t and node = 'complete'",
+        t=turn_id,
+    )
+    state = rows[0]["state_json"]
+    return json.loads(state) if isinstance(state, str) else state
+
+
+async def test_a_later_turn_overrides_an_earlier_preference_on_the_same_axis(orchestrated_aged):
+    cid = (await orchestrated_aged.post("/api/v1/conversations", json={})).json()["id"]
+    await _turn(orchestrated_aged, cid, "a dry full bodied red")
+    first = (await orchestrated_aged.get(f"/api/v1/conversations/{cid}")).json()
+    assert first["taste_profile"]["sweetness"] == "dry"
+
+    turn_id = await _turn(orchestrated_aged, cid, "actually I prefer sweet wines")
+    after = (await orchestrated_aged.get(f"/api/v1/conversations/{cid}")).json()
+    # The new answer wins on sweetness; the axes this turn did not mention carry over.
+    assert after["taste_profile"]["sweetness"] != "dry"
+    assert after["taste_profile"]["style"] == "red"
+    assert after["taste_profile"]["body"] == "full"
+    assert (await _complete_state(orchestrated_aged, turn_id))["profile"]["sweetness"] != "dry"
+
+
+async def test_a_one_off_request_shapes_the_answer_but_not_the_stored_taste(orchestrated_aged):
+    cid = (await orchestrated_aged.post("/api/v1/conversations", json={})).json()["id"]
+    await _turn(orchestrated_aged, cid, "a dry full bodied red")
+
+    turn_id = await _turn(orchestrated_aged, cid, "a sweet white wine for a tasting")
+    state = await _complete_state(orchestrated_aged, turn_id)
+    assert state["one_off"] is True
+    # This turn's answer was built for the occasion ...
+    assert state["profile"]["sweetness"] == "sweet"
+    assert state["profile"]["style"] == "white"
+    # ... while the user's own taste is untouched for the turns that follow.
+    after = (await orchestrated_aged.get(f"/api/v1/conversations/{cid}")).json()
+    assert after["taste_profile"]["sweetness"] == "dry"
+    assert after["taste_profile"]["style"] == "red"
