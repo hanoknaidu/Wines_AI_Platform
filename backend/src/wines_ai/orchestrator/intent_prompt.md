@@ -210,6 +210,7 @@ something.
 - `confidence` — 0 to 1, honest.
 - `out_of_scope_topic` — only when the intent is `out_of_scope`.
 - `slots` — see §6.
+- `scope` — see §7.
 
 ---
 
@@ -227,3 +228,17 @@ Two rules, and they matter more than completeness:
   so a guessed one silently skips a question the user needed. "Something for a
   barbecue" states no axis. "A light red" states `style` and `body`, and nothing about
   sweetness.
+
+---
+
+## 7. Scope
+
+Say whether the slots are the user's **own taste** or a **one-off**.
+
+- `one_off` — the turn asks for wine for an occasion or for someone else: "a sweet
+  white for a tasting", "a gift for my dad", "something for the party", "bringing a
+  bottle to Sam's", "my partner likes oaky reds", "just this once". The slots still
+  shape this answer, but they are not saved as what the user likes.
+- `preference` — everything else, including "I like dry wines", "something sweeter",
+  "a red for steak tonight with my own dinner". When unsure, say `preference`: a
+  stated taste that is not saved is worse than an occasion that is.

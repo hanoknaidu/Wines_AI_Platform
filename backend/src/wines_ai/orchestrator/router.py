@@ -123,6 +123,11 @@ async def route(
     # model may miss, and neither is a superset of the other.
     merged = {**interview.read_any(state.utterance), **slots}
     state.slots.update(merged)
+    # The model's read of "is this the user's taste or an occasion" catches phrasings
+    # the lexical list in taste/scope.py does not ("bringing a bottle to Sam's"). The
+    # graph ORs it with that list, so either one is enough to keep a turn out of the
+    # stored profile.
+    state.one_off = data.get("scope") == "one_off"
 
     if intent not in VALID_INTENTS or confidence < MIN_MODEL_CONFIDENCE:
         METRICS.incr("router.below_floor")

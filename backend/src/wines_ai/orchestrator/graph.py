@@ -91,7 +91,9 @@ async def run(ctx: Context):
         # A one-off ("a sweet wine for a tasting") applies to this turn only: the
         # in-memory profile drives this answer, the stored one is left alone, so the
         # next turn goes back to what the user actually likes.
-        state.one_off = scope_mod.is_one_off(state.utterance)
+        # The router's `scope` flag and the lexical list are ORed: the list is the floor
+        # when the model is unavailable, the model catches phrasings the list misses.
+        state.one_off = state.one_off or scope_mod.is_one_off(state.utterance)
         if patch:
             state.profile.update(patch)
         if patch and state.one_off:
