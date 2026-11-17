@@ -35,6 +35,7 @@ import logging
 from ..observability import METRICS, log
 from ..taste import explain as explain_mod
 from ..taste import interview as interview_mod
+from ..taste import scope as scope_mod
 from ..turns.engine import Checkpoint, ProfilePatch
 from .router import route
 from .state import Context
@@ -67,7 +68,9 @@ async def run(ctx: Context):
     if (
         state.intent in ("interview", "recommend")
         and state.intent_source != "chip"
-        and not state.slots
+        # The model router reads "Cabernet Sauvignon" as color=red, so slots alone
+        # cannot rule a question out: an explicit question ("describe ...") wins.
+        and (not state.slots or explain_mod.is_question(state.utterance))
         and explain_mod.find_varieties(state.utterance, ctx.index.rows)
     ):
         state.intent = "explain"
@@ -75,16 +78,27 @@ async def run(ctx: Context):
 
     # --- node: slot_merge ------------------------------------------------
     # Everything the turn stated, written into the profile once, before any workflow
-    # reads it. Only unfilled axes are written: a stored answer the user gave
-    # explicitly outranks one inferred from this turn's phrasing.
+    # reads it. The current turn wins on any axis it states: "dry" in turn 1 followed
+    # by "something sweeter" in turn 2 means sweet NOW - keeping the stale value made
+    # the sweetness filter return only dry wines. Axes this turn does not mention
+    # carry over from earlier turns, so context is kept without overriding the user.
     # A question ("describe Cabernet") states no preference, so nothing it mentions is
     # written into the taste profile.
     if state.intent not in ("out_of_scope", "explain"):
         patch = {
-            axis: value for axis, value in state.slots.items() if state.profile.get(axis) is None
+            axis: value for axis, value in state.slots.items() if state.profile.get(axis) != value
         }
+        # A one-off ("a sweet wine for a tasting") applies to this turn only: the
+        # in-memory profile drives this answer, the stored one is left alone, so the
+        # next turn goes back to what the user actually likes.
+        # The router's `scope` flag and the lexical list are ORed: the list is the floor
+        # when the model is unavailable, the model catches phrasings the list misses.
+        state.one_off = state.one_off or scope_mod.is_one_off(state.utterance)
         if patch:
             state.profile.update(patch)
+        if patch and state.one_off:
+            METRICS.incr("slot_merge.one_off")
+        elif patch:
             provenance = "asked" if state.intent_source == "chip" else "inferred"
             yield ProfilePatch(
                 values=patch,

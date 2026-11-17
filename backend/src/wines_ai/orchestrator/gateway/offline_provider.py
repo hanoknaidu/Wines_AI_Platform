@@ -149,6 +149,7 @@ def _lead_in(payload: dict) -> str:
 
 
 def _route(payload: dict) -> dict:
+    from ...taste.scope import is_one_off
     from ...turns.intent import classify
 
     intent, confidence, topic = classify(
@@ -162,6 +163,7 @@ def _route(payload: dict) -> dict:
         "confidence": confidence,
         "out_of_scope_topic": topic,
         "slots": _slots(payload).get("slots", {}),
+        "scope": "one_off" if is_one_off(payload.get("utterance", "")) else "preference",
     }
 
 

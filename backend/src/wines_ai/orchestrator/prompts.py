@@ -193,7 +193,9 @@ ROUTE = Prompt(
     # not a measured improvement over v1.
     # v3: adds the `explain` intent (knowledge questions answered directly instead of
     # being pushed into the taste interview).
-    version="3",
+    # v4: adds `scope` - whether the turn's slots are the user's own taste or a one-off
+    # (a tasting, a gift), so a one-off is not saved into the stored profile.
+    version="4",
     model_role="router",
     instructions=ROUTE_GUIDE,
     schema=_schema(
@@ -206,8 +208,9 @@ ROUTE = Prompt(
             "confidence": {"type": "number"},
             "out_of_scope_topic": {"type": ["string", "null"]},
             "slots": _slots_schema(),
+            "scope": {"type": "string", "enum": ["preference", "one_off"]},
         },
-        ["intent", "confidence", "out_of_scope_topic", "slots"],
+        ["intent", "confidence", "out_of_scope_topic", "slots", "scope"],
     ),
     max_tokens=512,
 )

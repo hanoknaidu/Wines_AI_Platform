@@ -17,7 +17,7 @@ from ..config import Settings
 from ..dataset.loader import DatasetIndex
 from ..taste import copy as copytext
 from ..taste import diversify as div
-from ..taste import explain, interview, ranking, refine
+from ..taste import explain, interview, ranking, refine, scope
 from .engine import (
     CardEvent,
     Checkpoint,
@@ -58,7 +58,7 @@ class DeterministicEngine:
         if (
             intent in ("interview", "recommend")
             and not req.selected_chip_id
-            and not interview.read_any(req.utterance)
+            and (not interview.read_any(req.utterance) or explain.is_question(req.utterance))
             and explain.find_varieties(req.utterance, self.index.rows)
         ):
             intent = "explain"
@@ -138,14 +138,19 @@ class DeterministicEngine:
         else:
             # Harvest every axis the utterance states, not only the one just asked:
             # re-asking what the user already said is the fastest way to look stupid.
+            # The current turn wins on any axis it states ("dry" earlier, "sweet"
+            # now means sweet); axes it does not mention carry over.
             for axis_id, value in interview.read_any(req.utterance).items():
-                if profile.get(axis_id) is None:
+                if profile.get(axis_id) != value:
                     patch[axis_id] = value
                     confidence[axis_id] = {"confidence": 0.8, "provenance": "inferred"}
 
         if patch:
             profile.update(patch)
-            yield ProfilePatch(values=patch, confidence=confidence)
+            # A one-off ("for a tasting", "as a gift") shapes this answer only; the
+            # stored taste is left alone. See taste/scope.py.
+            if not scope.is_one_off(req.utterance):
+                yield ProfilePatch(values=patch, confidence=confidence)
 
         asked_count = sum(
             1 for axis in ("style", "sweetness", "body", "oak") if profile.get(axis) is not None
@@ -201,10 +206,11 @@ class DeterministicEngine:
             return
 
         profile.update(patch)
-        yield ProfilePatch(
-            values=patch,
-            confidence={axis: {"confidence": 1.0, "provenance": "refined"} for axis in patch},
-        )
+        if not scope.is_one_off(req.utterance):
+            yield ProfilePatch(
+                values=patch,
+                confidence={axis: {"confidence": 1.0, "provenance": "refined"} for axis in patch},
+            )
         yield Checkpoint(node="refine", state={"chip": chip["id"], "patch": patch})
 
         ctx["intent"] = "refine"

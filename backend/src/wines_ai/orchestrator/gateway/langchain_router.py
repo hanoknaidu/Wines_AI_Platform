@@ -52,6 +52,7 @@ Style = Literal["red", "white", "rose", "sparkling", "dessert"]
 Sweetness = Literal["dry", "off_dry", "sweet"]
 Body = Literal["light", "medium", "full"]
 Oak = Literal["none", "subtle", "pronounced"]
+Scope = Literal["preference", "one_off"]
 
 
 def _schema():
@@ -110,6 +111,14 @@ def _schema():
         slots: Slots = Field(
             default_factory=Slots,
             description=("Axis values this turn actually states. Never guess one to fill a slot."),
+        )
+        scope: Scope = Field(
+            default="preference",
+            description=(
+                "'one_off' when the slots describe an occasion or someone else (a "
+                "tasting, a gift, a party, a friend's taste, just this once), so they "
+                "must not be saved as the user's own taste. Otherwise 'preference'."
+            ),
         )
 
     return Route

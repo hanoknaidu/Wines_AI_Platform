@@ -94,14 +94,14 @@ def _state(utterance, profile=None, previous=None):
 # --- the prompt -----------------------------------------------------------
 
 
-def test_route_v3_is_the_tested_guide_from_disk():
+def test_route_v4_is_the_tested_guide_from_disk():
     on_disk = (
         Path(__file__).parents[1] / "src" / "wines_ai" / "orchestrator" / "intent_prompt.md"
     ).read_text(encoding="utf-8")
-    assert ROUTE.version == "3"
+    assert ROUTE.version == "4"
     assert ROUTE.instructions == ROUTE_GUIDE == on_disk
     req = ROUTE.build(HAIKU, {"utterance": "x"})
-    assert req.prompt_id == "route@3"
+    assert req.prompt_id == "route@4"
     assert req.system[-1].text == on_disk and req.system[-1].cacheable
 
 
@@ -146,7 +146,7 @@ def test_route_goes_to_the_router_and_is_recorded_in_the_ledger():
 
     assert router.calls == 1 and upstream.calls == 0
     [call] = ledger.trace()
-    assert call["prompt_id"] == "route@3" and call["model"] == HAIKU
+    assert call["prompt_id"] == "route@4" and call["model"] == HAIKU
     assert call["cache_read"] == 4000 and call["tokens_in"] == 60
     assert call["cost_usd"] > 0, "a live routing call must be priced, not recorded as free"
 
@@ -195,6 +195,33 @@ def test_a_confident_model_answer_drives_the_route_and_its_slots():
     asyncio.run(route(_gateway(_Upstream(), router), TurnLedger(1.0), state, model=HAIKU))
     assert (state.intent, state.intent_source) == ("recommend", "model")
     assert state.slots["body"] == "full"
+
+
+def test_the_model_can_mark_a_turn_one_off_that_the_keyword_list_misses():
+    router = _FakeRouter(
+        {
+            "intent": "recommend",
+            "confidence": 0.9,
+            "reasoning": "A bottle for someone else's dinner.",
+            "out_of_scope_topic": None,
+            "slots": {"style": "red"},
+            "scope": "one_off",
+        }
+    )
+    state = _state("bringing a red to Sam's", profile={"sweetness": "dry"})
+    asyncio.run(route(_gateway(_Upstream(), router), TurnLedger(1.0), state, model=HAIKU))
+    assert state.one_off is True
+
+
+def test_a_route_answer_without_scope_is_a_preference():
+    router = _FakeRouter({"intent": "recommend", "confidence": 0.9, "slots": {}})
+    state = _state("a red", profile={"sweetness": "dry"})
+    asyncio.run(route(_gateway(_Upstream(), router), TurnLedger(1.0), state, model=HAIKU))
+    assert state.one_off is False
+
+
+def test_the_scope_field_defaults_to_preference():
+    assert _schema()(intent="recommend", confidence=0.9, reasoning="r").scope == "preference"
 
 
 def test_a_low_confidence_model_answer_is_floored_to_the_keyword_answer():

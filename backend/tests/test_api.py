@@ -439,3 +439,42 @@ async def test_errors_are_problem_json_without_stack_traces(aged):
     body = r.json()
     assert set(body) >= {"type", "title", "status", "detail", "code", "request_id"}
     assert "Traceback" not in r.text and 'File "' not in r.text
+
+
+# --- multi-turn taste context (deterministic engine) -----------------------
+
+
+async def _say(aged, cid: str, content: str) -> None:
+    r = await aged.post(
+        f"/api/v1/conversations/{cid}/messages",
+        json={"content": content, "selected_chip_id": None},
+        headers=KEY(),
+    )
+    assert r.status_code == 202, r.text
+    for _ in range(100):
+        await asyncio.sleep(0.1)
+        if aged._transport.app.state.services.registry.get(r.json()["turn_id"]) is None:
+            return
+    raise AssertionError("turn never settled")
+
+
+async def test_deterministic_a_later_turn_overrides_the_same_axis(aged):
+    cid = (await aged.post("/api/v1/conversations", json={})).json()["id"]
+    await _say(aged, cid, "a dry full bodied red")
+    await _say(aged, cid, "actually I prefer sweet wines")
+    profile = (await aged.get(f"/api/v1/conversations/{cid}")).json()["taste_profile"]
+    assert profile["sweetness"] == "sweet"
+    assert (profile["style"], profile["body"]) == ("red", "full")
+
+
+async def test_deterministic_a_one_off_is_not_saved(aged):
+    cid = (await aged.post("/api/v1/conversations", json={})).json()["id"]
+    await _say(aged, cid, "a dry red")
+    await _say(aged, cid, "a sweet light white wine for a tasting")
+    d = (await aged.get(f"/api/v1/conversations/{cid}")).json()
+    assert (d["taste_profile"]["sweetness"], d["taste_profile"]["style"]) == ("dry", "red")
+    # Body was still empty, so only the one-off rule keeps "light" out of the profile.
+    assert d["taste_profile"]["body"] is None
+    # The one-off turn still answered, with wines rather than a question.
+    last = d["messages"][-1]
+    assert any(p["kind"] == "card" for p in last["parts"])
