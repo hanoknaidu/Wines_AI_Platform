@@ -30,6 +30,7 @@ python3 classify.py "red, nothing too sweet"
 python3 classify.py "something lighter" --previous-results w_12,w_31
 python3 classify.py "in the middle" --profile '{"style":"red","sweetness":"dry"}'
 python3 classify.py --suite --verbose
+python3 classify.py --scope-suite        # only the one-off vs preference cases
 python3 classify.py --show-prompt        # no key needed
 ```
 
@@ -117,7 +118,7 @@ by copying older code:
 
 ## Cost
 
-A suite run is ~30 calls on a ~1,900-token prompt. At Haiku 5.5's $0.10/$0.50 per
+A suite run is ~45 calls (31 intent, 15 scope) on a ~1,900-token prompt. At Haiku 5.5's $0.10/$0.50 per
 MTok that is well under a cent, and the run prints its own measured figure. The
 guide is the whole system block and carries a cache breakpoint, so repeat runs
 within the cache window read most of that prefix at a tenth of the price — check
@@ -170,3 +171,16 @@ language out: `under 13%`, `about 10 years`, `around 6 people` and
 | **The model path** | **28/28 on two consecutive runs** (2026-11-11), all three no-workflow turns floored to `interview`. ~1.0 s per call, ~$0.012 per suite run, ~85K of ~180K input tokens served from cache. |
 | Found by the live run | The prompt listed level ids (`full`) but not the button labels users type back ("Rich and bold"), so a completing answer was routed `interview`. The axis table now carries both. |
 | Not yet measured | Run-to-run variance beyond two runs; anything outside the 31 hand-written cases. A suite this size shows the prompt is not broken, not that it is right — real transcripts are the next eval set. |
+
+## Scope: one-off vs preference
+
+Route v4 also returns `scope`: `preference` when the turn states the user's own
+taste, `one_off` when it asks for wine for an occasion or someone else ("a sweet
+white for a tasting", "bringing a bottle to Sam's"). The backend does not save a
+one-off turn's taste into the stored profile; see §7 of `intent_prompt.md`.
+
+`--scope-suite` scores this separately from intent. Its "missed by the list" cases
+are phrasings the backend's lexical fallback (`backend/src/wines_ai/taste/scope.py`)
+does not catch, so they measure what the model flag actually adds. A wrong
+`one_off` loses a real preference, so a miss on the `preference` cases is the
+costlier failure.
