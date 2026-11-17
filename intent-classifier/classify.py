@@ -38,6 +38,7 @@ PROMPT = HERE.parent / "backend" / "src" / "wines_ai" / "orchestrator" / "intent
 ENV = HERE / ".env"
 
 Intent = Literal["interview", "recommend", "refine", "out_of_scope"]
+Scope = Literal["preference", "one_off"]
 
 MODEL = "claude-haiku-5-5"
 
@@ -176,6 +177,18 @@ def build_chain():
                 "purchase, vintage, injection, or generic."
             ),
         )
+        # Mirrors route@4's `scope` in the backend (gateway/langchain_router.py):
+        # whether the turn's taste is the user's own, or an occasion that must not be
+        # saved into their profile. See section 7 of intent_prompt.md.
+        scope: Scope = Field(
+            default="preference",
+            description=(
+                "'one_off' when the turn asks for wine for an occasion or someone "
+                "else (a tasting, a gift, a party, a friend's taste, just this "
+                "once), so it must not be saved as the user's own taste. "
+                "Otherwise 'preference'."
+            ),
+        )
 
     key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not key:
@@ -304,6 +317,7 @@ def classify(
         "model_intent": intent,
         "confidence": parsed.confidence,
         "reasoning": parsed.reasoning,
+        "scope": parsed.scope,
         "ms": ms,
         "tokens": _tokens(envelope.get("raw")),
     }
@@ -405,6 +419,60 @@ SUITE: list[tuple[str, dict, str | None]] = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# The scope suite: is the taste in this turn the user's own, or a one-off?
+# Each case is (utterance, context, expected scope). Scored separately from intent,
+# because a turn can be routed right and scoped wrong - and a wrong `one_off` loses a
+# real preference, which is the costlier of the two mistakes.
+#
+# The "missed by the list" cases are the reason the model flag exists: the backend's
+# lexical list (backend/src/wines_ai/taste/scope.py) does not catch them. None of these
+# may trip the safety table, or the model is never asked.
+# ---------------------------------------------------------------------------
+SCOPE_SUITE: list[tuple[str, dict, str]] = [
+    # --- one_off, also caught by the backend's lexical list ---------------
+    ("A sweet white for a tasting", {"profile": {"style": "red", "sweetness": "dry"}},
+     "one_off"),
+    ("Something as a gift for my dad", {}, "one_off"),
+    ("A crowd-pleasing red for the party", {}, "one_off"),
+    ("Just this once, something really oaky",
+     {"profile": {"style": "white", "oak": "none"}}, "one_off"),
+    # --- one_off, missed by the lexical list ------------------------------
+    ("I'm bringing a bottle to Sam's on Friday", {}, "one_off"),
+    ("My partner loves big oaky reds, what should I get them?", {}, "one_off"),
+    ("We're hosting my in-laws and they only drink sweet wine", {}, "one_off"),
+    ("Something to take to a dinner at my boss's house", {}, "one_off"),
+    ("A sparkling to toast at my sister's engagement", {}, "one_off"),
+    # --- preference: the user's own taste, saved ---------------------------
+    ("I like dry wines", {}, "preference"),
+    ("Something sweeter", {"profile": {"style": "white", "sweetness": "dry"},
+                           "previous_row_ids": ["w_1"]}, "preference"),
+    ("A light red that isn't sweet", {}, "preference"),
+    ("Actually I prefer sweet wines", {"profile": {"style": "red", "sweetness": "dry"}},
+     "preference"),
+    ("A red to go with my steak tonight", {}, "preference"),
+    ("Rich and bold", {"profile": {"style": "red", "sweetness": "dry"}}, "preference"),
+]
+
+
+def run_scope_suite(chain, verbose: bool) -> int:
+    agree = 0
+    print(f"\nscope cases: {len(SCOPE_SUITE)}\n")
+    for utterance, context, expected in SCOPE_SUITE:
+        r = classify(chain, utterance, **context)
+        got = r.get("scope")
+        if got is None:
+            mark, got = "!!", f"({r['source']})"
+        else:
+            mark = "ok" if got == expected else "XX"
+            agree += got == expected
+        print(f"  {mark:2} {got:12} want {expected:10}  {utterance[:52]}")
+        if verbose:
+            print(f"        {r['reasoning']}")
+    print(f"\nagreed with the expected scope on {agree}/{len(SCOPE_SUITE)}")
+    return 0 if agree == len(SCOPE_SUITE) else 1
+
+
 def run_suite(chain, verbose: bool) -> int:
     agree = checked = 0
     spend = {"in": 0, "out": 0, "cache_read": 0, "cache_write": 0}
@@ -454,7 +522,10 @@ def main() -> int:
                         help='known taste axes as JSON, e.g. \'{"style":"red"}\'')
     parser.add_argument("--previous-results", default="",
                         help="comma-separated row ids the user was already shown")
-    parser.add_argument("--suite", action="store_true", help="run the built-in test set")
+    parser.add_argument("--suite", action="store_true",
+                        help="run the built-in test set (intent, then scope)")
+    parser.add_argument("--scope-suite", action="store_true",
+                        help="run only the one-off vs preference scope cases")
     parser.add_argument("--verbose", "-v", action="store_true", help="show reasoning")
     parser.add_argument("--show-prompt", action="store_true",
                         help="print the classification guide and exit")
@@ -467,8 +538,11 @@ def main() -> int:
     load_env()
     chain = build_chain()
 
+    if args.scope_suite:
+        return run_scope_suite(chain, args.verbose)
     if args.suite:
-        return run_suite(chain, args.verbose)
+        intent_rc = run_suite(chain, args.verbose)
+        return run_scope_suite(chain, args.verbose) or intent_rc
     if not args.utterance:
         parser.print_help()
         return 2
@@ -486,6 +560,8 @@ def main() -> int:
     )
     print(f"intent      {r['intent']}")
     print(f"confidence  {r['confidence']:.2f}")
+    if r.get("scope"):
+        print(f"scope       {r['scope']}")
     print(f"reasoning   {r['reasoning']}")
     print(f"source      {r['source']}")
     print(f"latency     {r['ms']}ms")
