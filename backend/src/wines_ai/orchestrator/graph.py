@@ -77,13 +77,15 @@ async def run(ctx: Context):
 
     # --- node: slot_merge ------------------------------------------------
     # Everything the turn stated, written into the profile once, before any workflow
-    # reads it. Only unfilled axes are written: a stored answer the user gave
-    # explicitly outranks one inferred from this turn's phrasing.
+    # reads it. The current turn wins on any axis it states: "dry" in turn 1 followed
+    # by "something sweeter" in turn 2 means sweet NOW - keeping the stale value made
+    # the sweetness filter return only dry wines. Axes this turn does not mention
+    # carry over from earlier turns, so context is kept without overriding the user.
     # A question ("describe Cabernet") states no preference, so nothing it mentions is
     # written into the taste profile.
     if state.intent not in ("out_of_scope", "explain"):
         patch = {
-            axis: value for axis, value in state.slots.items() if state.profile.get(axis) is None
+            axis: value for axis, value in state.slots.items() if state.profile.get(axis) != value
         }
         if patch:
             state.profile.update(patch)
