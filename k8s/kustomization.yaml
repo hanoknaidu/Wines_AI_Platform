@@ -1,0 +1,21 @@
+# `kubectl apply -k k8s/` applies everything into namespace wines-ai.
+# cd.yml rewrites the `images:` block per run to <acr>.azurecr.io/<name>:<git-sha>
+# (in the runner's checkout only; nothing is committed back).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: wines-ai
+resources:
+  - namespace.yaml
+  - backend-config.yaml
+  - backend-pvc.yaml
+  - backend-deployment.yaml
+  - backend-service.yaml
+  - frontend-deployment.yaml
+  - frontend-service.yaml
+images:
+  - name: wines-ai-backend
+    newName: wines-ai-backend
+    newTag: local
+  - name: wines-ai-frontend
+    newName: wines-ai-frontend
+    newTag: local

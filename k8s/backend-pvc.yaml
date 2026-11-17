@@ -1,0 +1,10 @@
+# SQLite db + ingest store at /data. ReadWriteOnce: one pod at a time.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-data
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi

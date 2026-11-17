@@ -243,20 +243,28 @@ Add these as **GitHub repo secrets/variables** (Settings → Secrets and variabl
 
 ---
 
-### [ ] 10. CD pipeline (plan only; build later)
+### [x] 10. CD pipeline: [.github/workflows/cd.yml](.github/workflows/cd.yml) + [k8s/](k8s/)
 
-New workflow `.github/workflows/cd.yml`, triggered when CI succeeds on `main`
-(`workflow_run` on `CI`, or `push` to `main`), plus `workflow_dispatch`.
+Trigger: CI finishes **green on a push to `main`** (`workflow_run`), or by hand
+(Actions → CD → Run workflow, optional commit SHA/branch).
 
 Steps:
-1. `azure/login` with OIDC (needs `permissions: id-token: write`).
-2. `az acr login`, build + push both images tagged with the **git SHA** (reuse the CI buildx cache).
-3. `azure/aks-set-context` to the cluster.
-4. `kubectl set image` (or `azure/k8s-deploy`) on `deploy/backend` and `deploy/frontend` with the new SHA tag.
-5. `kubectl rollout status` for both; fail the job if either does not become ready.
-6. (Optional) curl `http://<EXTERNAL-IP>/api/v1/readyz` as a smoke test.
+1. Check out the exact commit CI tested; `azure/login` with OIDC.
+2. Build both images and push to ACR tagged with the **full git SHA** (no `latest`), reusing the CI buildx cache.
+3. `azure/aks-set-context`; create namespace `wines-ai` and `backend-secret` (random `WA_COOKIE_SECRET`) **only if missing**.
+4. `kustomize edit set image` to the new SHA, then `kubectl apply -k k8s/`.
+5. `kubectl rollout status` for both deployments (logs/events printed on failure).
+6. Smoke test `http://<EXTERNAL-IP>/api/v1/readyz`; the IP is written to the run summary.
 
-Secrets (`WA_COOKIE_SECRET`, API key) stay in the cluster Secret; the pipeline never handles them.
+Rollback: Run workflow with an older commit SHA (its image is already in ACR,
+rebuild is a cache hit), or `kubectl -n wines-ai rollout undo deploy/backend`.
+
+Before the first run, step 9 must be done (federated credential subject
+`repo:hanoknaidu/Wines_AI_Platform:ref:refs/heads/main`) and these repo settings exist:
+secrets `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`; variables `ACR_NAME`, `AKS_RG`, `AKS_NAME`.
+
+Manifests are plain YAML + Kustomize (built into kubectl); Helm is not needed for two deployments.
+`kubectl apply -k k8s/` also works by hand after setting image tags.
 
 ---
 

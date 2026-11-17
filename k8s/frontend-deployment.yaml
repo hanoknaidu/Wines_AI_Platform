@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels: {app: frontend}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: frontend}
+  template:
+    metadata:
+      labels: {app: frontend}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101                 # nginx-unprivileged
+      containers:
+        - name: frontend
+          image: wines-ai-frontend      # tag set by cd.yml (kustomize edit set image)
+          ports:
+            - containerPort: 8080
+          env:
+            - name: BACKEND_ORIGIN
+              value: http://backend:8010
+          readinessProbe:
+            httpGet: {path: /, port: 8080}
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /, port: 8080}
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
